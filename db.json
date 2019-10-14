@@ -1,5 +1,4 @@
 {
-  //admin/products
   "admin/products" : [
     {
       "product_id": "P10000",
@@ -26,8 +25,7 @@
     "text" : "Unauthorized, token is incorrect"
   },
 
-
-  //admin/productType
+  
   "admin/productType" : [
     {
       "product_type_id": "PT1000",
