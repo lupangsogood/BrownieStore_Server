@@ -8,29 +8,29 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  const data = {};
+  const obj = { data: {} };
   Product.fetchAll()
     .then(([rows, fields]) => {
       // rows.forEach(row => {
       //   console.log(row.product_name);
       // });
-      data.data = rows;
+      obj.data.product = rows;
     })
     .catch(err => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       error.message = err.message;
-      data.error = error;
+      obj.error = error;
     })
     .finally(() => {
-      return next(data);
+      return next(obj);
     })
 
 };
 
 
 exports.postAddProduct = (req, res, next) => {
-  const data = {};
+  const obj = { data: {} };
   // res.setHeader('Content-Type', 'application/json')
   // res.write('you posted:\n')
   // res.end(JSON.stringify(req.body, null, 2));
@@ -39,31 +39,32 @@ exports.postAddProduct = (req, res, next) => {
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
-  const imgUrl = req.body.product_img_url;
+  const imgUrl = req.files; //need to naming in html as "image" from setting multer in app.js 
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;
   const isActive = true;
 
-  const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
-  product
-    .save()
-    .then(([row, fields]) => {
-      data.data = row.insertId;
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      error.message = err.message;
-      data.error = error;
-    })
-    .finally(() => {
-      return next(data);
-    })
+
+  // const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
+  // product
+  //   .save()
+  //   .then(([row, fields]) => {
+  //     obj.data = row.insertId;
+  //   })
+  //   .catch(err => {
+  //     const error = new Error(err);
+  //     error.httpStatusCode = 500;
+  //     error.message = err.message;
+  //     obj.error = error;
+  //   })
+  //   .finally(() => {
+  //     return next(obj);
+  //   })
 
 };
 
 exports.getProduct = async (req, res, next) => {
-  const data = {};
+  const obj = { data: {} };
   // const productId = req.query.productId;
   const productId = req.params.productId;
   // try {
@@ -80,22 +81,22 @@ exports.getProduct = async (req, res, next) => {
   Product.findById(productId)
     .then(rows => {
       if (rows[0].length == 0) {
-        data.data = {};
-      } else data.data = rows[0];d
+        obj.data.product = {};
+      } else obj.data.product = rows[0];d
     })
     .catch(err => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       error.message = err.message;
-      data.error = error;
+      obj.error = error;
     })
     .finally(() => {
-      return next(data);
+      return next(obj);
     })
 };
 
 exports.updateProduct = (req, res, next) => {
-  const data = {};
+  const obj = { data: {} };
   const id = req.params.productId;
 
   const name = req.body.product_name;
@@ -110,16 +111,16 @@ exports.updateProduct = (req, res, next) => {
   product
     .update()
     .then(rows => {
-      data.data = rows[0].affectedRows;
+      obj.data = rows[0].affectedRows;
     })
     .catch(err => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       error.message = err.message;
-      data.error = error;
+      obj.error = error;
     })
     .finally(() => {
-      return next(data);
+      return next(obj);
     })
     
 };
