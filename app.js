@@ -20,20 +20,31 @@ const errorController = require('./controllers/errorController');
 
 //routes
 const apiRoutes = require('./routes/api');
-const adminRoutes = require('./routes/admin');
-
-
-app.use(apiRoutes);
-app.use(adminRoutes);
 app.use('/api', apiRoutes);
-app.use('/admin', adminRoutes);
 
 
-app.get('/500', errorController.get500Page);
-app.use(errorController.get404Page);
-app.use((error, req, res, next) => {
-  res.status(error.httpStatusCode);
-  res.redirect('/500');
+//response
+app.use((data, req, res, next) => {
+  const error = data.error;
+  if (!error) {
+    res.status(200).json({
+        error: false,
+        statusCode: 200,
+        message: 'ok',
+        data: data.data
+    });  
+  } else {
+    res.status(error.httpStatusCode).json({
+      error: true,
+      statusCode: error.httpStatusCode,
+      message: error.message,
+      data: {}
+    })
+  }
 });
+
+
+app.use('/500', errorController.get500Page);
+app.use(errorController.get404Page);
 
 app.listen(3000);

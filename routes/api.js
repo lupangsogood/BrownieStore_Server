@@ -7,11 +7,11 @@ const router = express.Router();
 //controller
 const apiControllers = require('../controllers/apiController');
 
-router.get('/',(req, res, next) => res.end());
-router.get('/api', apiControllers.getIndex);
-router.get('/api/products', apiControllers.getProducts);
-router.get('/api/product/:productId', apiControllers.getProduct);
-router.post('/api/product', apiControllers.postAddProduct);
+router.get('/', apiControllers.getIndex);
+router.get('/product', apiControllers.getProducts);
+router.get('/product/:productId', apiControllers.getProduct);
+router.post('/product', apiControllers.postAddProduct);
+router.post('/product/:productId', apiControllers.updateProduct);
 
 
 
