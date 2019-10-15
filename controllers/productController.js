@@ -71,7 +71,6 @@ exports.getProduct = async (req, res, next) => {
   //   rows.forEach(row => {
   //     console.log(row.product_name);
   //   });
-  
   // } catch (err) {
   //   const error = new Error(err);
   //   error.httpStatusCode = 500;

@@ -5,13 +5,13 @@ const router = express.Router();
 
 
 //controller
-const apiControllers = require('../controllers/apiController');
+const productController = require('../controllers/productController');
 
-router.get('/', apiControllers.getIndex);
-router.get('/product', apiControllers.getProducts);
-router.get('/product/:productId', apiControllers.getProduct);
-router.post('/product', apiControllers.postAddProduct);
-router.post('/product/:productId', apiControllers.updateProduct);
+router.get('/', productController.getIndex);
+router.get('/product', productController.getProducts);
+router.get('/product/:productId', productController.getProduct);
+router.post('/product', productController.postAddProduct);
+router.post('/product/:productId', productController.updateProduct);
 
 
 
