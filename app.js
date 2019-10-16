@@ -14,10 +14,14 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 app.use(cors());
+
+//static
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images/product", express.static(path.join(__dirname, "images/product")));
+
 
 //upload
-app.use(multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter }).array("image"));
+app.use(multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter }).single("image"));
 
 //controllers
 const errorController = require("./controllers/errorController");
@@ -26,22 +30,38 @@ const errorController = require("./controllers/errorController");
 const apiRoutes = require("./routes/api");
 app.use("/api", apiRoutes);
 
+
 //response
-app.use((data, req, res, next) => {
-  const error = data.error;
+app.use((obj, req, res, next) => {
+  let error = {};
+  if (obj.data == undefined && obj) { 
+    error.httpStatusCode = 500;   // assign error if we didn't catch
+    error.message = obj.message + ` at ${req.url}`;
+  } else error = obj.error;
+
   if (!error) {
     res.status(200).json({
-      error: false,
-      statusCode: 200,
-      message: "ok",
-      data: data.data
+      head: {
+        error: false,
+        statusCode: 200,
+        message: "ok",
+      },
+      body: {
+        insertedId: obj.insertedId,
+        data: obj.data
+      }
     });
   } else {
     res.status(error.httpStatusCode).json({
-      error: true,
-      statusCode: error.httpStatusCode,
-      message: error.message,
-      data: {}
+      head: {
+        error: true,
+        statusCode: error.httpStatusCode,
+        message: error.message,
+      },
+      body: {
+        insertedId: 0,
+        data: {}
+      }
     });
   }
 });

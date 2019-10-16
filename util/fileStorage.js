@@ -17,6 +17,7 @@ exports.productStorage = multer.diskStorage({
     cb(null, 'images/product');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname)
+    const ext = file.originalname.split('.')[1];
+    cb(null, Date.now() + '.' + ext);
   }
 });
