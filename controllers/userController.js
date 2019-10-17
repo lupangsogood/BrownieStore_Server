@@ -1,12 +1,14 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('../util/config');
 
 exports.postSignup = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const id = null;
   const email = req.body.user_email;
   const password = req.body.user_password;
-  const token = req.body.user_token;
+  const token = req.body.user_social_token;
   const firstname = req.body.user_firstname;
   const lastname = req.body.user_lastname;
   const address = req.body.user_address;
@@ -42,8 +44,11 @@ exports.postSignup = async (req, res, next) => {
       obj.error = error;
     })
     .finally(() => {
-      return next(obj);
-    })
+      if (obj.error) {
+        return next(obj);
+      }
+      this.postLogin(req, res, next);
+    });
 };
 
 exports.postLogin = (req, res, next) => {
@@ -67,6 +72,12 @@ exports.postLogin = (req, res, next) => {
           error.statusCode = 401;
           throw error;
         }
+        const token = jwt.sign({
+          id: user.id, 
+          user_email: user.user_email, 
+        }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
+        obj.data.user = filterLoginResponse(user);
+        obj.data.user.access_token = token;
     })
     .catch(err => {
       const error = new Error(err);
@@ -81,4 +92,14 @@ exports.postLogin = (req, res, next) => {
 
 exports.postUserLogin = (req, res, next) => {
   const obj = { insertedId:0, data: {} };
+};
+
+//filter response
+const filterLoginResponse = (user) => {
+  delete user.user_password;
+  delete user.user_social_token;
+  delete user.created_at;
+  delete user.updated_at;
+  delete user.role_id;
+  return user;
 };
