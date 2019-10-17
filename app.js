@@ -41,8 +41,9 @@ app.use("/api", apiRoutes);
 //response
 app.use((obj, req, res, next) => {
   let error = {};
-  if (obj.data == undefined && obj) { 
-    error.statusCode = 500;   // assign error if we didn't catch
+  if (obj.data == undefined) { 
+    if (obj.statusCode) error.statusCode = obj.statusCode;
+    else error.statusCode = 500; // assign error if we didn't catch
     error.message = obj.message + ` at ${req.url}`;
   } else error = obj.error;
   
@@ -59,9 +60,6 @@ app.use((obj, req, res, next) => {
       }
     });
   } else {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
     res.status(error.statusCode).json({
       head: {
         error: true,

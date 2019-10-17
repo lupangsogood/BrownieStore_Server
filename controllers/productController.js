@@ -18,16 +18,11 @@ exports.getProducts = (req, res, next) => {
       //   console.log(row.product_name);
       // });
       obj.data.product = rows;
+      next(obj);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      return next(obj);
-    })
+      next(err);
+    });
 
 };
 
@@ -58,16 +53,11 @@ exports.postAddProduct = (req, res, next) => {
     .save()
     .then(([row, fields]) => {
       obj.insertedId = row.insertId;
+      next(obj);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      return next(obj);
-    })
+      next(err);
+    });
 
 };
 
@@ -91,16 +81,11 @@ exports.getProduct = async (req, res, next) => {
       if (rows[0].length == 0) {
         obj.data.product = {};
       } else obj.data.product = rows[0][0];
+      next(obj);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      return next(obj);
-    })
+      next(err);
+    });
 };
 
 exports.updateProduct = (req, res, next) => {
@@ -112,7 +97,7 @@ exports.updateProduct = (req, res, next) => {
   const desc = req.body.product_desc;
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;
-  const isActive = true;
+  const isActive = req.body.is_active;
 
   let imgUrl = req.body.product_img_url;
   let oldImgUrl = imgUrl;
@@ -131,15 +116,10 @@ exports.updateProduct = (req, res, next) => {
     .update()
     .then(rows => {
       // console.log('Update : ' + rows[0].affectedRows);
+      next(obj);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      return next(obj);
-    })
+      next(err);
+    });
     
 };

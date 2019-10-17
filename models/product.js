@@ -1,4 +1,5 @@
 const db = require("../util/database");
+const filter = require("../util/filter");
 const moment = require("moment");
 const momentz = require("moment-timezone");
 
@@ -16,10 +17,8 @@ module.exports = class Product {
     this.updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
   }
 
-  save() {
-    return db.execute(
-      "INSERT INTO products (product_name, product_unit, product_desc, product_img_url, product_rating, type_id, created_at, updated_at, is_active) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  async save() {
+    const data =  await filter.filterData(
       [
         this.name,
         this.unitName,
@@ -32,12 +31,14 @@ module.exports = class Product {
         this.isActive
       ]
     );
+    return db.execute(
+      "INSERT INTO products (product_name, product_unit, product_desc, product_img_url, product_rating, type_id, created_at, updated_at, is_active) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", data
+    );
   }
 
-  update() {
-    return db.execute(
-      "UPDATE products SET product_name=?, product_unit=?, product_desc=?, product_img_url=?, product_rating=?, type_id=?, updated_at=?, is_active=? " +
-        "WHERE id=?",
+  async update() {
+    const data =  await filter.filterData(
       [
         this.name,
         this.unitName,
@@ -50,22 +51,27 @@ module.exports = class Product {
         this.id
       ]
     );
+    return db.execute(
+      "UPDATE products SET product_name=?, product_unit=?, product_desc=?, product_img_url=?, product_rating=?, type_id=?, updated_at=?, is_active=? " +
+        "WHERE id=?", data
+    );
   }
 
-  static deleteById(id) {}
+  static async deleteById(id) {}
 
-  static testCallback(cb) {
+  static async testCallback(cb) {
     return db.execute("SELECT * FROM products WHERE is_active = 1", cb);
   }
 
-  static fetchAll() {
+  static async fetchAll() {
     return db.execute("SELECT * FROM products WHERE is_active = 1");
   }
 
-  static findById(id) {
+  static async findById(id) {
+    const data =  await filter.filterData([id]);
     return db.execute(
       "SELECT * FROM products WHERE products.id = ? AND is_active = 1",
-      [id]
+      data
     );
   }
 };

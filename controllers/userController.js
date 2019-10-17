@@ -36,18 +36,10 @@ exports.postSignup = async (req, res, next) => {
         error.statusCode = 401;
         throw error;
       }
+      this.postLogin(req, res, next);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      if (obj.error) {
-        return next(obj);
-      }
-      this.postLogin(req, res, next);
+      next(err);
     });
 };
 
@@ -73,26 +65,19 @@ exports.postLogin = (req, res, next) => {
           throw error;
         }
         const token = jwt.sign({
-          id: user.id, 
-          user_email: user.user_email, 
+          user_id: user.id, 
+          user_email: user.user_email,
+          role_id: user.role_id 
         }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
         obj.data.user = filterLoginResponse(user);
         obj.data.user.access_token = token;
+        next(obj);
     })
     .catch(err => {
-      const error = new Error(err);
-      error.statusCode = err.statusCode
-      error.message = err.message;
-      obj.error = error;
-    })
-    .finally(() => {
-      return next(obj);
-    })
+      next(err);
+    });
 };
 
-exports.postUserLogin = (req, res, next) => {
-  const obj = { insertedId:0, data: {} };
-};
 
 //filter response
 const filterLoginResponse = (user) => {
