@@ -15,6 +15,13 @@ app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-
 app.use(bodyParser.json()); // parse application/json
 app.use(cors());
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Method", "OPTIONS, GET, POST, PUT, PATH, DELETE");
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 //static
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/images/product", express.static(path.join(__dirname, "images/product")));
@@ -35,10 +42,10 @@ app.use("/api", apiRoutes);
 app.use((obj, req, res, next) => {
   let error = {};
   if (obj.data == undefined && obj) { 
-    error.httpStatusCode = 500;   // assign error if we didn't catch
+    error.statusCode = 500;   // assign error if we didn't catch
     error.message = obj.message + ` at ${req.url}`;
   } else error = obj.error;
-
+  
   if (!error) {
     res.status(200).json({
       head: {
@@ -52,10 +59,13 @@ app.use((obj, req, res, next) => {
       }
     });
   } else {
-    res.status(error.httpStatusCode).json({
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    res.status(error.statusCode).json({
       head: {
         error: true,
-        statusCode: error.httpStatusCode,
+        statusCode: error.statusCode,
         message: error.message,
       },
       body: {

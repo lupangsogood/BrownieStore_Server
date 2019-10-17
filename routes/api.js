@@ -12,6 +12,10 @@ router.get('/product/:productId', productController.getProduct);
 router.post('/product', productController.postAddProduct);
 router.post('/product/:productId', productController.updateProduct);
 
+const userController = require('../controllers/userController');
+router.post('/user/signup', userController.postSignup);
+router.post('/user/login', userController.postLogin);
+router.post('/user/social/login', userController.postUserLogin);
 
 
 module.exports = router; 

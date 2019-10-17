@@ -21,7 +21,7 @@ exports.getProducts = (req, res, next) => {
     })
     .catch(err => {
       const error = new Error(err);
-      error.httpStatusCode = 500;
+      error.statusCode = err.statusCode
       error.message = err.message;
       obj.error = error;
     })
@@ -61,7 +61,7 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch(err => {
       const error = new Error(err);
-      error.httpStatusCode = 500;
+      error.statusCode = err.statusCode
       error.message = err.message;
       obj.error = error;
     })
@@ -82,7 +82,7 @@ exports.getProduct = async (req, res, next) => {
   //   });
   // } catch (err) {
   //   const error = new Error(err);
-  //   error.httpStatusCode = 500;
+  // error.statusCode = err.statusCode
   //   return next(error);
   // }
 
@@ -90,11 +90,11 @@ exports.getProduct = async (req, res, next) => {
     .then(rows => {
       if (rows[0].length == 0) {
         obj.data.product = {};
-      } else obj.data.product = rows[0];
+      } else obj.data.product = rows[0][0];
     })
     .catch(err => {
       const error = new Error(err);
-      error.httpStatusCode = 500;
+      error.statusCode = err.statusCode
       error.message = err.message;
       obj.error = error;
     })
@@ -134,7 +134,7 @@ exports.updateProduct = (req, res, next) => {
     })
     .catch(err => {
       const error = new Error(err);
-      error.httpStatusCode = 500;
+      error.statusCode = err.statusCode
       error.message = err.message;
       obj.error = error;
     })
