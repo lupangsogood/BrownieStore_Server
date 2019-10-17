@@ -2,9 +2,7 @@ const db = require('../util/database');
 const filter = require("../util/filter");
 const moment = require('moment');
 const momentz = require('moment-timezone');
-
-const ROLE_USER = 0;
-const ROLE_ADMIN = 1;
+const Role = require('./role');
 
 module.exports = class Users {
   constructor(id, email, password, token, firstname, lastname, address, tel, isSocialLogin, isActive) {
@@ -16,7 +14,7 @@ module.exports = class Users {
     this.lastname = lastname;
     this.address = address;
     this.tel = tel;
-    this.role_id = ROLE_USER
+    this.role_id = Role.ROLE_USER
     this.isSocialLogin = isSocialLogin;
     this.isActive = isActive;
     this.createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");

@@ -39,7 +39,7 @@ exports.postSignup = async (req, res, next) => {
       this.postLogin(req, res, next);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
 };
 
@@ -74,7 +74,7 @@ exports.postLogin = (req, res, next) => {
         next(obj);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
 };
 

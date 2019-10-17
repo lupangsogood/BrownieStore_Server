@@ -21,7 +21,7 @@ exports.getProducts = (req, res, next) => {
       next(obj);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
 
 };
@@ -56,7 +56,7 @@ exports.postAddProduct = (req, res, next) => {
       next(obj);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
 
 };
@@ -84,7 +84,7 @@ exports.getProduct = async (req, res, next) => {
       next(obj);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
 };
 
@@ -119,7 +119,7 @@ exports.updateProduct = (req, res, next) => {
       next(obj);
     })
     .catch(err => {
-      next(err);
+      return next(err);
     });
     
 };
