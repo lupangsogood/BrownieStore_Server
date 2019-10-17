@@ -10,25 +10,20 @@ exports.getIndex = (req, res, next) => {
   });
 };
 
-exports.getProducts = (req, res, next) => {
+exports.getProducts = async (req, res, next) => {
   const obj = { data: {} };
-  Product.fetchAll()
-    .then(([rows, fields]) => {
-      // rows.forEach(row => {
-      //   console.log(row.product_name);
-      // });
-      obj.data.product = rows;
-      next(obj);
-    })
-    .catch(err => {
-      return next(err);
-    });
-
+  try {
+    const result = await Product.fetchAll();
+    obj.data.product = result[0];
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
 };
 
 
-exports.postAddProduct = (req, res, next) => {
-  const obj = { insertedId:0, data: {} };
+exports.postAddProduct = async (req, res, next) => {
+  const obj = { insertedId:1, data: {} };
   // res.setHeader('Content-Type', 'application/json')
   // res.write('you posted:\n')
   // res.end(JSON.stringify(req.body, null, 2));
@@ -48,50 +43,34 @@ exports.postAddProduct = (req, res, next) => {
     file.save(imgUrl);
   }
 
-  const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
-  product
-    .save()
-    .then(([row, fields]) => {
-      obj.insertedId = row.insertId;
-      next(obj);
-    })
-    .catch(err => {
-      return next(err);
-    });
-
+  try {
+    const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const result = await product.save();
+    obj.insertedId = result[0].insertId;
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
 };
 
 exports.getProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   // const productId = req.query.productId;
   const productId = req.params.productId;
-  // try {
-  //   const [rows, fields] = await Product.findById(productId);
-  //   rows.forEach(row => {
-  //     console.log(row.product_name);
-  //   });
-  // } catch (err) {
-  //   const error = new Error(err);
-  // error.statusCode = err.statusCode
-  //   return next(error);
-  // }
-
-  Product.findById(productId)
-    .then(rows => {
-      if (rows[0].length == 0) {
-        obj.data.product = {};
-      } else obj.data.product = rows[0][0];
-      next(obj);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  try {
+    const result = await Product.findById(productId);
+    if (result[0].length == 0) {
+      obj.data.product = {};
+    } else obj.data.product = result[0][0];
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
 };
 
-exports.updateProduct = (req, res, next) => {
+exports.updateProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const id = req.params.productId;
-
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
@@ -111,15 +90,12 @@ exports.updateProduct = (req, res, next) => {
     }); 
   }
 
-  const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
-  product
-    .update()
-    .then(rows => {
-      // console.log('Update : ' + rows[0].affectedRows);
-      next(obj);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  try {
+    const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const result = await product.update();
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
     
 };

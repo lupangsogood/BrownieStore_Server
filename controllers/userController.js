@@ -26,56 +26,53 @@ exports.postSignup = async (req, res, next) => {
   }
   const hashPassword = await hash(password);
 
-  const user = new User(id, email, hashPassword, token, firstname, lastname, address, tel, isSocialLogin, isActive);
-  user
-    .save()
-    .then(([row, fields]) => {
-      obj.insertedId = row.insertId;
-      if (obj.insertedId == 0) {
-        const error =  new Error("This email has already been used");
-        error.statusCode = 401;
-        throw error;
-      }
-      this.postLogin(req, res, next);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  try {
+    const user = new User(id, email, hashPassword, token, firstname, lastname, address, tel, isSocialLogin, isActive);
+    const result = await user.save();
+    obj.insertedId = result[0].insertId;
+    if (obj.insertedId == 0) {
+      const error =  new Error("This email has already been used");
+      error.statusCode = 401;
+      throw error;
+    }
+    this.postLogin(req, res, next);
+  } catch (err) {
+    return next(err);
+  }
 };
 
-exports.postLogin = (req, res, next) => {
+exports.postLogin = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const email = req.body.user_email;
   const password = req.body.user_password;
   let user; 
-  User.findByEmail(email)
-    .then(rows => {
-      if (rows[0].length == 0) {
-        const error =  new Error("Email not found");
-        error.statusCode = 401;
-        throw error;
-      } 
-      user = rows[0][0];
-      return bcrypt.compare(password, user.user_password);
-    })
-    .then(isEqual => {
-        if (!isEqual) {
-          const error = new Error('Your password is incorrect');
-          error.statusCode = 401;
-          throw error;
-        }
-        const token = jwt.sign({
-          user_id: user.id, 
-          user_email: user.user_email,
-          role_id: user.role_id 
-        }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
-        obj.data.user = filterLoginResponse(user);
-        obj.data.user.access_token = token;
-        next(obj);
-    })
-    .catch(err => {
-      return next(err);
-    });
+
+  try {
+    const result = await User.findByEmail(email);
+    if (result[0].length == 0) {
+      const error =  new Error("Email not found");
+      error.statusCode = 401;
+      throw error;
+    } 
+    user = result[0][0];
+    const isEqual = await bcrypt.compare(password, user.user_password);
+    if (!isEqual) {
+      const error = new Error('Your password is incorrect');
+      error.statusCode = 401;
+      throw error;
+    }
+    const token = jwt.sign({
+      user_id: user.id, 
+      user_email: user.user_email,
+      role_id: user.role_id 
+    }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
+    obj.data.user = filterLoginResponse(user);
+    obj.data.user.access_token = token;
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
+
 };
 
 
