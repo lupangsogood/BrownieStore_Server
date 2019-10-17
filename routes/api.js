@@ -25,6 +25,7 @@ router.post('/product/:productId', productController.updateProduct);
 const userController = require('../controllers/userController');
 router.post('/user/signup', userController.postSignup);
 router.post('/user/login', userController.postLogin);
-
+router.post('/user/social/login', userController.postSocialLogin);
+router.post('/user/:userId', userController.postUpdateUser);
 
 module.exports = router; 

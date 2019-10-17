@@ -2,10 +2,9 @@ const db = require('../util/database');
 const filter = require("../util/filter");
 const moment = require('moment');
 const momentz = require('moment-timezone');
-const Role = require('./role');
 
 module.exports = class Users {
-  constructor(id, email, password, token, firstname, lastname, address, tel, isSocialLogin, isActive) {
+  constructor(id, email, password, token, firstname, lastname, address, tel, roleId, isSocialLogin, isActive) {
     this.id = id;
     this.email = email;
     this.password = password;
@@ -14,7 +13,7 @@ module.exports = class Users {
     this.lastname = lastname;
     this.address = address;
     this.tel = tel;
-    this.role_id = Role.ROLE_USER
+    this.role_id = roleId
     this.isSocialLogin = isSocialLogin;
     this.isActive = isActive;
     this.createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
@@ -52,8 +51,35 @@ module.exports = class Users {
   static async findByEmail(email) {
     const data =  await filter.filterData([email]);
     return db.execute(
-      "SELECT * FROM users WHERE user_email = ? LIMIT 1",
+      "SELECT * FROM users WHERE user_email = ? AND is_social_login = 0 LIMIT 1",
       data
     );
   }
+
+  static async findByToken(token) {
+    const data =  await filter.filterData([token]);
+    return db.execute(
+      "SELECT * FROM users WHERE user_social_token = ? LIMIT 1",
+      data
+    );
+  }
+
+
+  async update() {
+    const data =  await filter.filterData(
+      [
+        this.firstname,
+        this.lastname,
+        this.address,
+        this.tel,
+        this.updatedAt,
+        this.id
+      ]
+    );
+    return db.execute(
+      "UPDATE users SET user_firstname=?, user_lastname=?, user_address=?, user_tel=?, updated_at=? " +
+      "WHERE id=?", data
+    );
+  }
+
 }
