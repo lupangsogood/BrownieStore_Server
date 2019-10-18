@@ -28,7 +28,7 @@ exports.postAddProduct = async (req, res, next) => {
   // res.write('you posted:\n')
   // res.end(JSON.stringify(req.body, null, 2));
 
-  const id = null;
+  const productId = null;
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
@@ -44,7 +44,7 @@ exports.postAddProduct = async (req, res, next) => {
   }
 
   try {
-    const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const product = new Product(productId, name, unitName, desc, imgUrl, rating, typeId, isActive);
     const result = await product.save();
     obj.insertedId = result[0].insertId;
     next(obj);
@@ -70,7 +70,7 @@ exports.getProduct = async (req, res, next) => {
 
 exports.updateProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const id = req.params.productId;
+  const productId = req.params.productId;
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
@@ -91,7 +91,7 @@ exports.updateProduct = async (req, res, next) => {
   }
 
   try {
-    const product = new Product(id, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const product = new Product(productId, name, unitName, desc, imgUrl, rating, typeId, isActive);
     const result = await product.update();
     next(obj);
   } catch (err) {

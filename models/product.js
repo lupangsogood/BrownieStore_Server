@@ -4,8 +4,8 @@ const moment = require("moment");
 const momentz = require("moment-timezone");
 
 module.exports = class Product {
-  constructor(id, name, unitName, desc, imgUrl, rating, typeId, isActive) {
-    this.id = id;
+  constructor(porductId, name, unitName, desc, imgUrl, rating, typeId, isActive) {
+    this.productId = porductId;
     this.name = name;
     this.unitName = unitName;
     this.desc = desc;
@@ -48,16 +48,16 @@ module.exports = class Product {
         this.typeId,
         this.updatedAt,
         this.isActive,
-        this.id
+        this.productId
       ]
     );
     return db.execute(
       "UPDATE products SET product_name=?, product_unit=?, product_desc=?, product_img_url=?, product_rating=?, type_id=?, updated_at=?, is_active=? " +
-        "WHERE id=?", data
+        "WHERE product_id=?", data
     );
   }
 
-  static async deleteById(id) {}
+  static async deleteById(productId) {}
 
   static async testCallback(cb) {
     return db.execute("SELECT * FROM products WHERE is_active = 1", cb);
@@ -67,10 +67,10 @@ module.exports = class Product {
     return db.execute("SELECT * FROM products WHERE is_active = 1");
   }
 
-  static async findById(id) {
-    const data =  await filter.filterData([id]);
+  static async findById(productId) {
+    const data =  await filter.filterData([productId]);
     return db.execute(
-      "SELECT * FROM products WHERE products.id = ? AND is_active = 1",
+      "SELECT * FROM products WHERE products.product_id = ? AND is_active = 1",
       data
     );
   }

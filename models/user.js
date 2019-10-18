@@ -34,15 +34,16 @@ module.exports = class Users {
         this.updatedAt,
         this.isSocialLogin,
         this.isActive,
-        this.roldId,
-        this.email //check email is existing
+        this.roleId,
+        this.email, //check email is existing
+        this.token //check email is existing
       ]
     );
     return db.execute(
       "INSERT INTO users (user_email, user_password, user_social_token, user_firstname, user_lastname, user_address, user_tel, created_at, updated_at, is_social_login, is_active, role_id) " +
       "SELECT * FROM (SELECT ? AS a, ? AS b, ? AS c, ? AS d, ? AS e, ? AS f, ? AS g, ? AS h, ? AS i, ? AS j, ? AS k, ? AS L) AS tmp " +
       "WHERE NOT EXISTS ( " +
-      "SELECT user_email FROM users WHERE user_email = ? ) LIMIT 1 ",
+      "SELECT user_email FROM users WHERE user_email = ? AND user_social_token = ?) LIMIT 1 ",
       // "INSERT INTO users (user_email, user_password, user_social_token, user_firstname, user_lastname, user_address, user_tel, created_at, updated_at, is_social_login, is_active) " +
       //   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       data
@@ -78,7 +79,7 @@ module.exports = class Users {
     );
     return db.execute(
       "UPDATE users SET user_firstname=?, user_lastname=?, user_address=?, user_tel=?, updated_at=? " +
-      "WHERE id=?", data
+      "WHERE user_id=?", data
     );
   }
 
