@@ -23,7 +23,7 @@ exports.getProducts = async (req, res, next) => {
 
 
 exports.postAddProduct = async (req, res, next) => {
-  const obj = { insertedId:1, data: {} };
+  const obj = { insertedId:0, data: {} };
   // res.setHeader('Content-Type', 'application/json')
   // res.write('you posted:\n')
   // res.end(JSON.stringify(req.body, null, 2));
@@ -68,7 +68,7 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
-exports.updateProduct = async (req, res, next) => {
+exports.postUpdateProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const productId = req.params.productId;
   const name = req.body.product_name;

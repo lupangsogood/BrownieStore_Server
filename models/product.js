@@ -4,8 +4,8 @@ const moment = require("moment");
 const momentz = require("moment-timezone");
 
 module.exports = class Product {
-  constructor(porductId, name, unitName, desc, imgUrl, rating, typeId, isActive) {
-    this.productId = porductId;
+  constructor(productId, name, unitName, desc, imgUrl, rating, typeId, isActive) {
+    this.productId = productId;
     this.name = name;
     this.unitName = unitName;
     this.desc = desc;

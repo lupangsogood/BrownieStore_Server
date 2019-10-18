@@ -19,13 +19,21 @@ router.post('/product', productController.postAddProduct);
 // router.post('/product/:productId',  (req, res, next) => {
 //   req.permissions = [Role.ROLE_USER, Role.ROLE_ADMIN];
 //   next();
-// }, isAuth, productController.updateProduct);
-router.post('/product/:productId', productController.updateProduct);
+// }, isAuth, productController.postUpdateProduct);
+router.post('/product/:productId', productController.postUpdateProduct);
 
 const userController = require('../controllers/userController');
 router.post('/user/signup', userController.postSignup);
 router.post('/user/login', userController.postLogin);
 router.post('/user/social/login', userController.postSocialLogin);
 router.post('/user/:userId', userController.postUpdateUser);
+
+
+const typeController = require('../controllers/typeController');
+router.get('/type', typeController.getTypes);
+router.get('/type/:typeId', typeController.getType);
+router.post('/type', typeController.postAddType);
+router.post('/type/:typeId', typeController.postUpdateType);
+
 
 module.exports = router; 
