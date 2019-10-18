@@ -4,8 +4,8 @@ const moment = require('moment');
 const momentz = require('moment-timezone');
 
 module.exports = class Users {
-  constructor(id, email, password, token, firstname, lastname, address, tel, roleId, isSocialLogin, isActive) {
-    this.id = id;
+  constructor(userId, email, password, token, firstname, lastname, address, tel, roleId, isSocialLogin, isActive) {
+    this.userId = userId;
     this.email = email;
     this.password = password;
     this.token = token;
@@ -13,7 +13,7 @@ module.exports = class Users {
     this.lastname = lastname;
     this.address = address;
     this.tel = tel;
-    this.role_id = roleId
+    this.roleId = roleId
     this.isSocialLogin = isSocialLogin;
     this.isActive = isActive;
     this.createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
@@ -34,7 +34,7 @@ module.exports = class Users {
         this.updatedAt,
         this.isSocialLogin,
         this.isActive,
-        this.role_id,
+        this.roldId,
         this.email //check email is existing
       ]
     );
@@ -73,7 +73,7 @@ module.exports = class Users {
         this.address,
         this.tel,
         this.updatedAt,
-        this.id
+        this.userId
       ]
     );
     return db.execute(

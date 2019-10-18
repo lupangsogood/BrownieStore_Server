@@ -6,7 +6,7 @@ const Role = require('../models/role');
 
 exports.postSignup = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const id = null;
+  const userId = null;
   const email = req.body.user_email;
   const password = req.body.user_password;
   const token = req.body.user_social_token;
@@ -20,7 +20,7 @@ exports.postSignup = async (req, res, next) => {
   
   try {
     const hashPassword = await hash(password);
-    const user = new User(id, email, hashPassword, token, firstname, lastname, address, tel, roleId, isSocialLogin, isActive);
+    const user = new User(userId, email, hashPassword, token, firstname, lastname, address, tel, roleId, isSocialLogin, isActive);
     const result = await user.save();
     obj.insertedId = result[0].insertId;
     if (obj.insertedId == 0) {
@@ -55,7 +55,7 @@ exports.postLogin = async (req, res, next) => {
       throw error;
     }
     const token = jwt.sign({
-      user_id: user.id, 
+      user_id: user.user_id, 
       user_email: user.user_email,
       role_id: user.role_id 
     }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
@@ -88,16 +88,16 @@ exports.postSocialLogin = async (req, res, next) => {
     if (result[0].length == 0) {
         const user = new User(null, email, null, socialToken, firstname, lastname, null, null, roleId, isSocialLogin, isActive);
         await user.save();
-        const id = result[0].insertId;
+        const userId = result[0].insertId;
 
         const token = jwt.sign({
-          user_id: id, 
+          user_id: userId, 
           user_email: email,
           role_id: roleId 
         }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
         
         obj.data.user = {
-          id: obj.insertedId,
+          user_id: obj.insertedId,
           user_email: email,
           user_firstname: firstname,
           user_lastname: lastname,
@@ -130,13 +130,13 @@ exports.postSocialLogin = async (req, res, next) => {
 
 exports.postUpdateUser = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const id = req.params.userId;
+  const userId = req.params.userId;
   const firstname = req.body.user_firstname;
   const lastname = req.body.user_lastname;
   const address = req.body.user_address;
   const tel = req.body.user_tel;
   try {
-    const user = new User(id, null, null, null, firstname, lastname, address, tel, null, null, null);
+    const user = new User(userId, null, null, null, firstname, lastname, address, tel, null, null, null);
     await user.update();
     next(obj);
   } catch (err) {
