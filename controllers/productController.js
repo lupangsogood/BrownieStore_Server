@@ -1,4 +1,5 @@
-const Product = require("../models/product");
+const Product = require("../models/Product");
+const Type = require("../models/Type");
 const Resize = require('../util/Resize');
 const uuidv1 = require('uuid/v1');
 const fs = require("fs");
@@ -13,7 +14,9 @@ exports.getIndex = (req, res, next) => {
 exports.getProducts = async (req, res, next) => {
   const obj = { data: {} };
   try {
-    const result = await Product.fetchAll();
+    const [products, types] = await Promise.all([Product.fetchAll(), Type.fetchAll()]);
+    obj.data.product = products[0];
+    obj.data.type = types[0];
     obj.data.product = result[0];
     next(obj);
   } catch (err) {

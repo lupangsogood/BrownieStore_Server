@@ -1,6 +1,6 @@
 module.exports = {
   jwt: {
-    secret_key: 'allgood',
+    secret_key: 'brownie',
     expire: '4h'
   } 
 }

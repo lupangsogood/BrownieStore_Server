@@ -3,37 +3,52 @@ const rootDir = require('../util/path');
 const express = require('express');
 const router = express.Router();
 const isAuth = require('../util/isAuth');
-const Role = require('../models/role');
+const Role = require('../models/Role');
 
 
 //controller
-const productController = require('../controllers/productController');
-// router.get('/', productController.getIndex);
-router.get('/product', productController.getProducts);
-router.get('/product/:productId', productController.getProduct);
+const ProductController = require('../controllers/ProductController');
+router.get('/product', ProductController.getProducts);
+router.get('/product/:productId', ProductController.getProduct);
+router.post('/product', ProductController.postAddProduct);
+router.post('/product/:productId', ProductController.postUpdateProduct);
+
+// router.get('/', ProductController.getIndex);
 // router.post('/product',  (req, res, next) => {
 //   req.permissions = [Role.ROLE_USER, Role.ROLE_ADMIN];
 //   next();
-// }, isAuth, productController.postAddProduct);
-router.post('/product', productController.postAddProduct);
+// }, isAuth, ProductController.postAddProduct);
 // router.post('/product/:productId',  (req, res, next) => {
 //   req.permissions = [Role.ROLE_USER, Role.ROLE_ADMIN];
 //   next();
-// }, isAuth, productController.postUpdateProduct);
-router.post('/product/:productId', productController.postUpdateProduct);
+// }, isAuth, ProductController.postUpdateProduct);
 
-const userController = require('../controllers/userController');
-router.post('/user/signup', userController.postSignup);
-router.post('/user/login', userController.postLogin);
-router.post('/user/social/login', userController.postSocialLogin);
-router.post('/user/:userId', userController.postUpdateUser);
+const UserController = require('../controllers/UserController');
+router.post('/user/signup', UserController.postSignup);
+router.post('/user/login', UserController.postLogin);
+router.post('/user/social/login', UserController.postSocialLogin);
+router.post('/user/:userId', UserController.postUpdateUser);
 
 
-const typeController = require('../controllers/typeController');
-router.get('/type', typeController.getTypes);
-router.get('/type/:typeId', typeController.getType);
-router.post('/type', typeController.postAddType);
-router.post('/type/:typeId', typeController.postUpdateType);
+const TypeController = require('../controllers/TypeController');
+router.get('/type', TypeController.getTypes);
+router.get('/type/:typeId', TypeController.getType);
+router.post('/type', TypeController.postAddType);
+router.post('/type/:typeId', TypeController.postUpdateType);
+
+
+const ShopController = require('../controllers/ShopController');
+router.get('/shop', ShopController.getShops);
+router.get('/shop/:shopId', ShopController.getShop);
+router.post('/shop', ShopController.postAddShop);
+router.post('/shop/:shopId', ShopController.postUpdateShop);
+
+const OrderController = require('../controllers/OrderController');
+router.get('/order', OrderController.getOrders);
+router.get('/order/:orderOd', OrderController.getOrder);
+router.get('/cart/:userId', OrderController.getOrderCart);
+router.post('/order', OrderController.postAddOrder);
+router.post('/order/:orderId', OrderController.postUpdateOrder);
 
 
 module.exports = router; 
