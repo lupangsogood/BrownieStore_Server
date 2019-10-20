@@ -16,6 +16,7 @@ app.use(bodyParser.json()); // parse application/json
 app.use(cors());
 
 app.use((req, res, next) => {
+  req.userId = 1;
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Method", "OPTIONS, GET, POST, PUT, PATH, DELETE");
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

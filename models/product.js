@@ -57,6 +57,23 @@ module.exports = class Product {
     );
   }
 
+  static async updateRating(productId, rating) {
+    const data =  await filter.filterData(
+      [
+        rating,
+        productId,
+        rating
+      ]
+    );
+    return db.execute(
+      `
+      UPDATE products SET product_price = product_price + (?) WHERE product_id = ?
+      AND (product_price + ?) > -1
+      `,
+      data
+    );
+  }
+
   static async deleteById(productId) {}
 
   static async testCallback(cb) {
@@ -66,21 +83,30 @@ module.exports = class Product {
   static async fetchAll() {
     return db.execute(`
     SELECT 
-    p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
-    t.type_id, t.type_name
+    p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, 
+    p.product_price, p.product_quantity, p.product_rating,
+    t.type_name,
+    NULL AS shop_name,
+    NULL AS order_detail_id,
+    NULL AS price, NULL AS quantity
     FROM products p
     INNER JOIN types t ON p.type_id = t.type_id
-    WHERE p.is_active = 1`);
+    WHERE p.is_active = 1`
+    );
   }
 
   static async findById(productId) {
     const data =  await filter.filterData([productId]);
-    return db.execute(
-      `SELECT
-      p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
-      t.type_id, t.type_name
+    return db.execute(`
+      SELECT 
+      p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, 
+      p.product_price, p.product_quantity, p.product_rating,
+      t.type_name,
+      NULL AS shop_name,
+      NULL AS order_detail_id,
+      NULL AS price, NULL AS quantity
       FROM products p
-      INNER JOIN types t ON p.type_id = t.type_id 
+      INNER JOIN types t ON p.type_id = t.type_id
       WHERE p.product_id = ? AND p.is_active = 1`,
       data
     );

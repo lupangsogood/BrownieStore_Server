@@ -50,20 +50,34 @@ module.exports = class Order {
   }
 
   static async fetchAll() {
-    return db.execute(`SELECT * FROM orders`);
+    return db.execute(`
+    SELECT  * FROM orders o 
+    INNER JOIN order_detail od ON o.order_id = od.order_id
+    INNER JOIN products p ON p.product_id = od.product_id
+    INNER JOIN types t ON t.type_id = p.type_id
+    INNER JOIN shops s ON s.shop_id = od.shop_id
+    `);
   }
   
   static async findById(orderId) {
     const data =  await filter.filterData([orderId]);
     return db.execute(
-      `SELECT * FROM orders WHERE order_id = ? `
+      `
+      SELECT  * FROM orders o 
+      INNER JOIN order_detail od ON o.order_id = od.order_id
+      INNER JOIN products p ON p.product_id = od.product_id
+      INNER JOIN types t ON t.type_id = p.type_id
+      INNER JOIN shops s ON s.shop_id = od.shop_id
+      WHERE o.order_id = ? `
       , data);
   }
 
   static async findCart(userId) {
-    const data =  await filter.filterData([userId, Order.ORDER_CART_STATUS]);
+    const data =  await filter.filterData([userId, Order.ORDER_CART_STATUS.id]);
     return db.execute(
-      `SELECT * FROM orders WHERE user_id = ? AND order_sts_id = ? LIMIT 1`
+      `SELECT *
+      FROM orders o
+      WHERE o.user_id = ? AND o.order_sts_id = ? LIMIT 1`
       , data);
   }
 
@@ -116,7 +130,7 @@ module.exports = class Order {
       , data);
   }
 
-  async static cancel(orderId) {
+  static async cancel(orderId) {
     const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
     const isActive = false;
     const data =  await filter.filterData(
@@ -160,5 +174,46 @@ module.exports = class Order {
   }
   static get EMS_COMPLETE_STATUS() {
     return EMS_COMPLETE_STATUS;
+  }
+
+  
+  static getOrderResponse(data) {
+    let result = [];
+    data.forEach((data) => {
+      let order = {};
+      order.order_id = data.order_id;
+      order.order_sts_id = data.order_sts_id;
+      order.order_sts =  data.order_sts;
+      order.order_ems = data.order_ems;
+      order.order_ems_sts = data.order_ems_sts;
+      order.order_ems_sts_id = data.order_ems_sts_id;
+      order.order_total_price = data.order_total_price;
+      order.order_transfer = data.order_transfer
+      order.transfer = data.transfer;
+      order.bank_id = data.bank_id;
+      order.transfered_at = data.transfered_at;
+      order.is_active = data.is_active;
+      order.product = Order.getOrderDetail(data);
+      result.push(order);
+    });
+    return result;
+  }
+  static getOrderDetail(data) {
+    let orderDetail = {};
+    orderDetail.order_detail_id = data.order_detail_id;
+    orderDetail.product_id = data.product_id;
+    orderDetail.product_name = data.product_name;
+    orderDetail.product_unit = data.product_unit;
+    orderDetail.product_desc = data.product_desc;
+    orderDetail.product_img_url = data.product_img_url;
+    orderDetail.product_rating = data.product_rating;
+    orderDetail.product_price = data.product_price;
+    orderDetail.product_quantity = data.product_quantity;
+    orderDetail.shop_name = data.shop_name;
+    orderDetail.type_name = data.type_name;
+    orderDetail.quantity = data.quantity;
+    orderDetail.price = data.price;
+
+    return orderDetail;
   }
 }

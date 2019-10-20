@@ -1,6 +1,5 @@
 const Shop = require("../models/Shop");
 
-
 exports.getShops = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   try {
@@ -18,8 +17,8 @@ exports.getShop = async (req, res, next) => {
   try {
     const result = await Shop.findById(shopId);
     if (result[0].length == 0) {
-      obj.data.shop = {};
-    } else obj.data.shop = result[0][0];
+      obj.data.shop = [];
+    } else obj.data.shop = result[0];
     next(obj);
   } catch (err) {
     return next(err);

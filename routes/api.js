@@ -12,6 +12,7 @@ router.get('/product', ProductController.getProducts);
 router.get('/product/:productId', ProductController.getProduct);
 router.post('/product', ProductController.postAddProduct);
 router.post('/product/:productId', ProductController.postUpdateProduct);
+router.post('/product/rating/:productId', ProductController.postUpdateRatingProduct);
 
 // router.get('/', ProductController.getIndex);
 // router.post('/product',  (req, res, next) => {
@@ -45,10 +46,10 @@ router.post('/shop/:shopId', ShopController.postUpdateShop);
 
 const OrderController = require('../controllers/OrderController');
 router.get('/order', OrderController.getOrders);
-router.get('/order/:orderOd', OrderController.getOrder);
-router.get('/cart/:userId', OrderController.getOrderCart);
-router.post('/order', OrderController.postAddOrder);
-router.post('/order/:orderId', OrderController.postUpdateOrder);
-
+router.get('/order/:orderId', OrderController.getOrder);
+router.post('/order/:orderId', OrderController.postUpdateOrder)
+router.get('/cart', OrderController.getNewOrder);
+router.post('/cart', OrderController.postUpdateOrderDetail); //Update order detail
+router.post('/cart/confirm', OrderController.postConfirmOrder);
 
 module.exports = router; 

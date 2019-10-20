@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const Type = require("../models/Type");
+const Shop = require("../models/Shop");
 const Resize = require('../util/Resize');
 const uuidv1 = require('uuid/v1');
 const fs = require("fs");
@@ -14,10 +15,10 @@ exports.getIndex = (req, res, next) => {
 exports.getProducts = async (req, res, next) => {
   const obj = { data: {} };
   try {
-    const [products, types] = await Promise.all([Product.fetchAll(), Type.fetchAll()]);
+    const [products, types, shops] = await Promise.all([Product.fetchAll(), Type.fetchAll(), Shop.fetchAll()]);
     obj.data.product = products[0];
     obj.data.type = types[0];
-    obj.data.product = result[0];
+    obj.data.shop = shops[0];
     next(obj);
   } catch (err) {
     return next(err);
@@ -63,8 +64,8 @@ exports.getProduct = async (req, res, next) => {
   try {
     const result = await Product.findById(productId);
     if (result[0].length == 0) {
-      obj.data.product = {};
-    } else obj.data.product = result[0][0];
+      obj.data.product = [];
+    } else obj.data.product = result[0];
     next(obj);
   } catch (err) {
     return next(err);
@@ -102,3 +103,17 @@ exports.postUpdateProduct = async (req, res, next) => {
   }
     
 };
+
+exports.postUpdateRatingProduct = async (req, res, next) => {
+  const obj = { insertedId:0, data: {} };
+  const productId = req.params.productId;
+  const productRating = req.body.product_rating;
+
+  try {
+    const result = await Product.updateRating(productId, productRating);
+    obj.insertedId = result[0].insertId;
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
+}

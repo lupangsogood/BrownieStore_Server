@@ -17,8 +17,8 @@ exports.getType = async (req, res, next) => {
   try {
     const result = await Type.findById(typeId);
     if (result[0].length == 0) {
-      obj.data.type = {};
-    } else obj.data.type = result[0][0];
+      obj.data.type = [];
+    } else obj.data.type = result[0];
     next(obj);
   } catch (err) {
     return next(err);
