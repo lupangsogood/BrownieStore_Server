@@ -64,13 +64,24 @@ module.exports = class Product {
   }
 
   static async fetchAll() {
-    return db.execute("SELECT * FROM products WHERE is_active = 1");
+    return db.execute(`
+    SELECT 
+    p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
+    t.type_id, t.type_name
+    FROM products p
+    INNER JOIN types t ON p.type_id = t.type_id
+    WHERE p.is_active = 1`);
   }
 
   static async findById(productId) {
     const data =  await filter.filterData([productId]);
     return db.execute(
-      "SELECT * FROM products WHERE products.product_id = ? AND is_active = 1",
+      `SELECT
+      p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
+      t.type_id, t.type_name
+      FROM products p
+      INNER JOIN types t ON p.type_id = t.type_id 
+      WHERE p.product_id = ? AND p.is_active = 1`,
       data
     );
   }

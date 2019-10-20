@@ -43,7 +43,7 @@ module.exports = class Type {
   }
 
   static async fetchAll() {
-    return db.execute("SELECT * FROM types WHERE is_active = 1");
+    return db.execute("SELECT type_id, type_name FROM types WHERE is_active = 1");
   }
 
   static async findById(typeId) {

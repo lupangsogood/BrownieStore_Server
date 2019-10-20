@@ -36,4 +36,12 @@ router.post('/type', typeController.postAddType);
 router.post('/type/:typeId', typeController.postUpdateType);
 
 
+const shopController = require('../controllers/shopController');
+router.get('/detailshop/:shopId/:productId', shopController.getShopDetail);
+router.get('/detailshop/:shopId', shopController.getShop);
+
+const orderController = require('../controllers/orderController');
+router.get('/cart', orderController.getCart);
+router.get('/order/:orderId', orderController.getOrderDetail);
+
 module.exports = router; 
