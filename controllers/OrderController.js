@@ -62,42 +62,45 @@ exports.postUpdateOrder = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const userId = req.user_id;
   const orderId = req.params.order_id;
-  const isActive = req.body.is_active;
-
-  let statusId = null;
-  let status = null;
+  let isActive = req.body.is_active;
   let ems = req.body.order_ems;
-  let emsStatusId = null;
-  let emsStatus = null;
+  let emsStatus = req.body.order_ems_sts;
+  let emsStatusId = req.body.order_ems_sts_id;
 
-  const totalPrice = null;
-  const transfer = null;
-  const imgUrl = null;
-  const bankId = null;
 
-  if (!isActive) {
+  if (isActive == false) {
     statusId = Order.ORDER_SHOP_CANCEL_STATUS.id;
     status = Order.ORDER_SHOP_CANCEL_STATUS.text;
   } else {
     statusId = Order.ORDER_SHIPPING_STATUS.id;
     status = Order.ORDER_SHIPPING_STATUS.text;
   }
-  if (!ems) {
-    ems = '';
-  }
-  
+
   try {
-    const order = new Order(orderId, userId, statusId, status, totalPrice, transfer, imgUrl, bankId, isActive, ems, emsStatus, emsStatusId);
+    const orderResult = await Order.findById(orderId);
+    const oldOrder = orderResult[0][0];
+    
+    isActive = (isActive === undefined ? oldOrder.is_active : isActive);
+    ems = (ems === undefined ? oldOrder.order_ems : ems);
+    emsStatus = (emsStatus === undefined ? oldOrder.order_ems_sts : emsStatus);
+    emsStatusId = (emsStatusId === undefined ? oldOrder.order_ems_sts_id : emsStatusId);
+    
+    const order = new Order({
+      orderId: orderId, 
+      statusId: statusId,
+      status: status,
+      isActive: isActive, 
+      ems: ems,
+      emsStatus:emsStatus,
+      emsStatusId: emsStatusId
+    });
+ 
     const result = await order.updateOrder();
     next(obj);
   } catch (err) {
     return next(err);
   }
 }
-exports.postUpdateAutoEmsOrder = async (req, res, next) => {
-  //status ems
-}
-
 
 exports.postUpdateUserOrder = async (req, res, next) => {
   //cancel order or submit cart
@@ -111,18 +114,9 @@ exports.postPayment = async (req, res, next) => {
 
 const addNewOrder = async (userId) => {
   try {
-    const orderId = null;
     const statusId = Order.ORDER_CART_STATUS.id; 
     const status = Order.ORDER_CART_STATUS.text;
-    const totalPrice = 0;
-    const transfer = 0;
-    const imgUrl = null;
-    const bankId = null;
-    const isActive = true;
-    const ems = null;
-    const emsStatus = null;
-    const emsStatusId = null;
-    const order = new Order(orderId, userId, statusId, status, totalPrice, transfer, imgUrl, bankId, isActive, ems, emsStatus, emsStatusId)
+    const order = new Order({userId: userId, statusId: statusId, status: status });
     const result = await order.save();
     return result;
   } catch (err) {

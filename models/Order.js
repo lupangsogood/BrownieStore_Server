@@ -18,7 +18,14 @@ const EMS_COMPLETE_STATUS = {id: 4, text: 'สำเร็จ'};
 
 
 module.exports = class Order {
-  constructor(orderId, userId, statusId, status, totalPrice, transfer, imgUrl, bankId, isActive, ems, emsStatus, emsStatusId) {
+  constructor({
+    orderId = null, userId = null, statusId = null, status = null, 
+    totalPrice = null, transfer = null, imgUrl = null, bankId = null, 
+    isActive = true, ems = null, emsStatus = null, emsStatusId = null,
+    transferedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
+    createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
+    updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss")
+    }) {
     this.orderId = orderId;
     this.userId = userId;
     this.statusId = statusId;
@@ -31,9 +38,9 @@ module.exports = class Order {
     this.ems = ems;
     this.emsStatus = emsStatus;
     this.emsStatusId = emsStatusId;
-    this.transferedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
-    this.createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
-    this.updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
+    this.transferedAt = transferedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   async save() {
@@ -66,7 +73,7 @@ module.exports = class Order {
   }
   
   static async findById(orderId) {
-    const data =  await filter.filterData([orderId, Order.ORDER_CART_STATUS.id]);
+    const data =  await filter.filterData([orderId]);
     return db.execute(
       `
       SELECT  * FROM orders o 
@@ -74,7 +81,7 @@ module.exports = class Order {
       INNER JOIN products p ON p.product_id = od.product_id
       INNER JOIN types t ON t.type_id = p.type_id
       INNER JOIN shops s ON s.shop_id = od.shop_id
-      WHERE o.order_id = ? AND o.order_sts_id <> ?`
+      WHERE o.order_id = ? `
       , data);
   }
 
@@ -87,7 +94,7 @@ module.exports = class Order {
       LEFT JOIN products p ON p.product_id = od.product_id
       LEFT JOIN types t ON t.type_id = p.type_id
       LEFT JOIN shops s ON s.shop_id = od.shop_id
-      WHERE o.user_id = ? AND o.order_sts_id = ? 
+      WHERE o.user_id = ? AND o.order_sts_id = ? LIMIT 1
       `
       , data);
   }
@@ -115,6 +122,9 @@ module.exports = class Order {
   async updateOrder() {
     const data =  await filter.filterData(
       [
+        this.ems,
+        this.emsStatus,
+        this.emsStatusId,
         this.statusId,
         this.status,
         this.updatedAt,
@@ -124,25 +134,10 @@ module.exports = class Order {
       ]
     );
     return db.execute(
-      `UPDATE orders SET order_sts_id=?, order_sts=?, updated_at=? 
+      `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, updated_at=?, 
       order_ems=?, is_active=? WHERE order_id =?`
       , data);
   }
-
-  // async updateAutoEmsOrder() {
-  //   const data =  await filter.filterData(
-  //     [
-  //       this.ems,
-  //       this.emsStatus,
-  //       this.emsStatusId,
-  //       this.updatedAt,
-  //       this.orderId
-  //     ]
-  //   );
-  //   return db.execute(
-  //     `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, updated_at=? WHERE order_id = ?`
-  //     , data);
-  // }
 
   static async updateTotalPrice(orderId) {
     const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
