@@ -36,6 +36,8 @@ exports.postAddProduct = async (req, res, next) => {
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
+  const price = req.body.product_price;
+  const quantity = req.body.product_quantity;
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;
   const isActive = true;
@@ -48,7 +50,7 @@ exports.postAddProduct = async (req, res, next) => {
   }
 
   try {
-    const product = new Product(productId, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const product = new Product(productId, name, unitName, desc, price, quantity, imgUrl, rating, typeId, isActive);
     const result = await product.save();
     obj.insertedId = result[0].insertId;
     next(obj);
@@ -60,7 +62,7 @@ exports.postAddProduct = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   // const productId = req.query.productId;
-  const productId = req.params.productId;
+  const productId = req.params.product_id;
   try {
     const result = await Product.findById(productId);
     if (result[0].length == 0) {
@@ -74,10 +76,12 @@ exports.getProduct = async (req, res, next) => {
 
 exports.postUpdateProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const productId = req.params.productId;
+  const productId = req.params.product_id;
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
+  const price = req.body.product_price;
+  const quantity = req.body.product_quantity;
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;
   const isActive = req.body.is_active;
@@ -90,12 +94,14 @@ exports.postUpdateProduct = async (req, res, next) => {
     imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
     file.save(imgUrl);
     fs.unlink(oldImgUrl, err => { // remove old file
-      //console.log(err);
+      if (err) {
+        return next(err);
+      }
     }); 
   }
 
   try {
-    const product = new Product(productId, name, unitName, desc, imgUrl, rating, typeId, isActive);
+    const product = new Product(productId, name, unitName, desc, price, quantity, imgUrl, rating, typeId, isActive);
     const result = await product.update();
     next(obj);
   } catch (err) {
@@ -106,7 +112,7 @@ exports.postUpdateProduct = async (req, res, next) => {
 
 exports.postUpdateRatingProduct = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const productId = req.params.productId;
+  const productId = req.params.product_id;
   const productRating = req.body.product_rating;
 
   try {

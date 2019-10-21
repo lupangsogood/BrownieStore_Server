@@ -4,11 +4,13 @@ const moment = require("moment");
 const momentz = require("moment-timezone");
 
 module.exports = class Product {
-  constructor(productId, name, unitName, desc, imgUrl, rating, typeId, isActive) {
+  constructor(productId, name, unitName, desc, price, quantity, imgUrl, rating, typeId, isActive) {
     this.productId = productId;
     this.name = name;
     this.unitName = unitName;
     this.desc = desc;
+    this.price = price;
+    this.quantity = quantity;
     this.imgUrl = imgUrl;
     this.rating = rating;
     this.typeId = typeId;
@@ -23,6 +25,8 @@ module.exports = class Product {
         this.name,
         this.unitName,
         this.desc,
+        this.price,
+        this.quantity,
         this.imgUrl,
         this.rating,
         this.typeId,
@@ -32,8 +36,8 @@ module.exports = class Product {
       ]
     );
     return db.execute(
-      "INSERT INTO products (product_name, product_unit, product_desc, product_img_url, product_rating, type_id, created_at, updated_at, is_active) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", data
+      "INSERT INTO products (product_name, product_unit, product_desc, product_price, product_quantity, product_img_url, product_rating, type_id, created_at, updated_at, is_active) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data
     );
   }
 
@@ -43,6 +47,8 @@ module.exports = class Product {
         this.name,
         this.unitName,
         this.desc,
+        this.price,
+        this.quantity,
         this.imgUrl,
         this.rating,
         this.typeId,
@@ -52,7 +58,7 @@ module.exports = class Product {
       ]
     );
     return db.execute(
-      "UPDATE products SET product_name=?, product_unit=?, product_desc=?, product_img_url=?, product_rating=?, type_id=?, updated_at=?, is_active=? " +
+      "UPDATE products SET product_name=?, product_unit=?, product_desc=?, product_price=?, product_quantity=?, product_img_url=?, product_rating=?, type_id=?, updated_at=?, is_active=? " +
         "WHERE product_id=?", data
     );
   }

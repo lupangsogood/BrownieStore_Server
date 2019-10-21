@@ -13,7 +13,7 @@ exports.getShops = async (req, res, next) => {
 
 exports.getShop = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const shopId = req.params.shopId;
+  const shopId = req.params.shop_id;
   try {
     const result = await Shop.findById(shopId);
     if (result[0].length == 0) {
@@ -44,10 +44,10 @@ exports.postAddShop = async (req, res, next) => {
 
 exports.postUpdateShop = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const shopId = req.params.shopId;
+  const shopId = req.params.shop_id;
   const name = req.body.shop_name;
   const tel = req.body.shop_tel;
-  const isActive = true;
+  const isActive = req.body.is_active;
   try {
     const shop = new Shop(shopId, name, tel, isActive);
     const result = await shop.update();

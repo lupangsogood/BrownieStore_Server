@@ -13,7 +13,7 @@ exports.getTypes = async (req, res, next) => {
 
 exports.getType = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const typeId = req.params.typeId;
+  const typeId = req.params.type_id;
   try {
     const result = await Type.findById(typeId);
     if (result[0].length == 0) {
@@ -42,7 +42,7 @@ exports.postAddType = async (req, res, next) => {
 
 exports.postUpdateType = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const typeId = req.params.typeId;
+  const typeId = req.params.type_id;
   const name = req.body.type_name;
   const isActive = req.body.is_active;
   try {
