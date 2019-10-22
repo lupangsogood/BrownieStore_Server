@@ -3,93 +3,171 @@ const filter = require("../util/filter");
 const moment = require("moment");
 const momentz = require("moment-timezone");
 
-const SHOW_ALL_ORDER = 0;
-const ORDER_CART_STATUS = {id: 1, text: 'CART'};
-const ORDER_PENDING_STATUS = {id: 2, text: 'PENDING'};
-const ORDER_WAITING_STATUS = {id: 3, text: 'WAITING'};
-const ORDER_SHIPPING_STATUS = {id: 4, text: 'SHIPPING'};
-const ORDER_COMPLETE_STATUS = {id: 5, text: 'COMPLETE'};
+const ORDER_CART_STATUS = {id: 1, text: 'ตระกร้าสินค้า'};
+const ORDER_PENDING_STATUS = {id: 2, text: 'รอชำระเงิน'};
+const ORDER_WAITING_STATUS = {id: 3, text: 'รอตรวจสอบ'};
+const ORDER_SHIPPING_STATUS = {id: 4, text: 'รอขนส่ง'};
+const ORDER_COMPLETE_STATUS = {id: 5, text: 'สำเร็จ'};
+const ORDER_CANCEL_STATUS = {id: 6, text: 'ยกเลิก'};
+const ORDER_SHOP_CANCEL_STATUS = {id: 7, text: 'ยกเลิก (เจ้าของร้าน)'};
 
-module.exports = class DetailOrder {
-  constructor(userId, orderStsId, orderSts, totalPrice, tranferPrice, bank_id, tranferedAt, isActive) {
+const EMS_PENDING_STATUS = {id: 1, text: 'กำลังดำเนินการ'};
+const EMS_WAITING_STATUS = {id: 2, text: 'กำลังตรวจสอบ'};
+const EMS_SHIPPING_STATUS = {id: 3, text: 'กำลังขนส่ง'};
+const EMS_COMPLETE_STATUS = {id: 4, text: 'สำเร็จ'};
+
+
+module.exports = class Order {
+  constructor({
+    orderId = null, userId = null, statusId = null, status = null, 
+    totalPrice = null, transfer = null, imgUrl = null, bankId = null, 
+    isActive = true, ems = null, emsStatus = null, emsStatusId = null,
+    transferedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
+    createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
+    updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss")
+    }) {
+    this.orderId = orderId;
     this.userId = userId;
-    this.orderStsId = orderStsId;
-    this.orderSts = orderSts;
+    this.statusId = statusId;
+    this.status = status;
     this.totalPrice = totalPrice;
-    this.tranferPrice = tranferPrice;
-    this.bank_id = bank_id;
-    this.tranferedAt = tranferedAt;
+    this.transfer = transfer;
+    this.imgUrl = imgUrl;
+    this.bankId = bankId;
     this.isActive = isActive;
-    this.createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
-    this.updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
+    this.ems = ems;
+    this.emsStatus = emsStatus;
+    this.emsStatusId = emsStatusId;
+    this.transferedAt = transferedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   async save() {
     const data =  await filter.filterData(
       [
         this.userId,
-        this.orderStsId,
-        this.orderSts,
-        this.totalPrice,
-        this.tranferPrice,
-        this.bank_id,
-        this.tranferedAt,
+        this.statusId,
+        this.status,
         this.createdAt,
-        this.updatedAt
+        this.updatedAt,
+        this.isActive
       ]
     );
     return db.execute(
-      `INSERT INTO orders (user_id, order_sts_id, order_sts, order_total_price, order_transfer, bank_id, tranfered_at, created_at, updated_at, is_active
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, data
+      `INSERT INTO orders (user_id, order_sts_id, order_sts, created_at, updated_at, is_active) 
+      VALUES (?, ?, ?, ?, ?, ?)`
+      , data);
+  }
+
+  static async fetchAll() {
+    const data =  await filter.filterData([Order.ORDER_CART_STATUS.id]);
+    return db.execute(`
+    SELECT  * FROM orders o 
+    INNER JOIN order_detail od ON o.order_id = od.order_id
+    INNER JOIN products p ON p.product_id = od.product_id
+    INNER JOIN types t ON t.type_id = p.type_id
+    INNER JOIN shops s ON s.shop_id = od.shop_id
+    WHERE o.order_sts_id <> ?
+    `, data);
+  }
+  
+  static async findById(orderId) {
+    const data =  await filter.filterData([orderId]);
+    return db.execute(
+      `
+      SELECT  * FROM orders o 
+      INNER JOIN order_detail od ON o.order_id = od.order_id
+      INNER JOIN products p ON p.product_id = od.product_id
+      INNER JOIN types t ON t.type_id = p.type_id
+      INNER JOIN shops s ON s.shop_id = od.shop_id
+      WHERE o.order_id = ? `
+      , data);
+  }
+
+  static async findCart(userId) {
+    const data =  await filter.filterData([userId, Order.ORDER_CART_STATUS.id]);
+    return db.execute(
+      `
+      SELECT o.*, p.*, od.quantity, od.price FROM orders o 
+      LEFT JOIN order_detail od ON o.order_id = od.order_id
+      LEFT JOIN products p ON p.product_id = od.product_id
+      LEFT JOIN types t ON t.type_id = p.type_id
+      LEFT JOIN shops s ON s.shop_id = od.shop_id
+      WHERE o.user_id = ? AND o.order_sts_id = ? LIMIT 1
+      `
+      , data);
+  }
+
+  async updatePayment() {
+    const data =  await filter.filterData(
+      [
+        this.imgUrl,
+        this.statusId,
+        this.status,
+        this.bankId,
+        this.transferedAt,
+        this.updatedAt,
+        this.orderId
+      ]
     );
+    return db.execute(
+      `UPDATE orders SET order_img_url=?, order_sts_id=?, order_sts=?, bank_id=?,
+      transfered_at=? ,updated_at=? WHERE order_id = ?`
+      , data);
   }
 
-  
-  static async findOrder(userId, orderStatusId) {
-    const data =  await filter.filterData([userId, orderStatusId]);
-    const result = await db.execute(
-    `
-    SELECT
-    o.order_id,
-    dto.detail_order_id,
-    dp.detail_product_id, dp.detail_product_quantity, dp.detail_product_price, dp.topping_detail_product_id,
-    p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
-    t.type_id, t.type_name,
-    tp.topping_product_id, ds.detail_shop_id, ds.quantity, ds.price, ds.shop_id
-  
-    FROM orders o 
-    INNER JOIN detail_order dto ON dto.order_id = o.order_id
-    INNER JOIN detail_shop ds ON ds.shop_id = dto.shop_id
-    INNER JOIN shops s ON s.shop_id = ds.shop_id
-    INNER JOIN detail_product dp ON dp.product_id = ds.product_id AND dto.detail_order_id = dp.detail_order_id
-    LEFT JOIN topping tp ON tp.product_id = dp.product_id
-    INNER JOIN products p ON p.product_id = dp.product_id
-    INNER JOIN types t ON p.type_id = t.type_id
-      
-    UNION
-
-    SELECT
-    o.order_id,
-    dto.detail_order_id,
-    dp.detail_product_id, dp.detail_product_quantity, dp.detail_product_price, dp.topping_detail_product_id,
-    p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, p.product_rating,
-    t.type_id, t.type_name,
-    NULL as topping_product_id, ds.detail_shop_id, ds.quantity, ds.price,ds.shop_id
-    FROM products p 
-    INNER JOIN detail_shop ds ON p.product_id = ds.product_id    
-    INNER JOIN types t ON p.type_id = t.type_id
-    INNER JOIN topping tp ON tp.topping_product_id = p.product_id
-    LEFT JOIN detail_order dto ON  dto.shop_id = ds.shop_id
-    LEFT JOIN detail_product dp ON dp.product_id = ds.product_id AND dp.detail_order_id = dto.detail_order_id AND dp.topping_detail_product_id = tp.product_id
-    LEFT JOIN orders o ON o.order_id = dto.order_id
-    GROUP BY dp.detail_product_id, p.product_id, ds.shop_id
-    `
-    , data);
-
-    return findTopping(result[0]);
+  async updateOrder() {
+    const data =  await filter.filterData(
+      [
+        this.ems,
+        this.emsStatus,
+        this.emsStatusId,
+        this.statusId,
+        this.status,
+        this.transfer,
+        this.updatedAt,
+        this.isActive,
+        this.orderId
+      ]
+    );
+    return db.execute(
+      `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, order_transfer=?, updated_at=?, 
+      is_active=? WHERE order_id =?`
+      , data);
   }
 
-  
+  static async updateTotalPrice(orderId) {
+    const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
+    const data =  await filter.filterData(
+      [
+        updatedAt,
+        orderId,
+        orderId
+      ]
+    );
+    return db.execute(
+      `UPDATE orders o SET o.updated_at = ? ,o.order_total_price = COALESCE((SELECT SUM(od.quantity*od.price) AS total FROM order_detail od WHERE od.order_id = ?), 0)
+       WHERE o.order_id = ?`
+      , data);
+  }
+
+  static async cancel(orderId) {
+    const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
+    const isActive = false;
+    const data =  await filter.filterData(
+      [
+        updatedAt,
+        isActive,
+        orderId
+      ]
+    );
+    return db.execute(
+      `UPDATE orders SET updated_at=?, is_active=? WHERE order_id = ?`
+      , data);
+  }
+
+
   static get ORDER_CART_STATUS() {
     return ORDER_CART_STATUS;
   }
@@ -105,57 +183,87 @@ module.exports = class DetailOrder {
   static get ORDER_COMPLETE_STATUS() {
     return ORDER_COMPLETE_STATUS;
   }
-  static get SHOW_ALL_ORDER() {
-    return SHOW_ALL_ORDER;
+  static get ORDER_CANCEL_STATUS() {
+    return ORDER_CANCEL_STATUS;
   }
-}
+  static get ORDER_SHOP_CANCEL_STATUS() {
+    return ORDER_SHOP_CANCEL_STATUS;
+  }
 
-const findTopping = (rows) => {
-  let mapToppingId = {};
-  let ids = [];
-  let toppings = rows.filter(topping => topping.topping_product_id == null);
-  let products = rows.filter(product => {
-    const key = product.detail_product_id;
-    const inserted = ids.includes(product.detail_product_id);
-    //check product if it has topping then collected
-    if (product.topping_product_id != null) {
-        if (!mapToppingId[key]) {
-          mapToppingId[key] = [];
+  static get EMS_PENDING_STATUS() {
+    return EMS_PENDING_STATUS;
+  }
+  static get EMS_WAITING_STATUS() {
+    return EMS_WAITING_STATUS;
+  }
+  static get EMS_SHIPPING_STATUS() {
+    return EMS_SHIPPING_STATUS;
+  }
+  static get EMS_COMPLETE_STATUS() {
+    return EMS_COMPLETE_STATUS;
+  }
+
+  
+  static getOrderResponse(data) {
+    let ids = [];
+    let result = [];
+    let mapId = {};
+    let index = 0;
+    data.forEach((data) => {
+
+      if (!data.order_id) {
+        return;
+      }
+
+      if (!ids.includes(data.order_id)) {
+        let order = {};
+        order.order_id = data.order_id;
+        order.order_sts_id = data.order_sts_id;
+        order.order_sts =  data.order_sts;
+        order.order_ems = data.order_ems;
+        order.order_ems_sts = data.order_ems_sts;
+        order.order_ems_sts_id = data.order_ems_sts_id;
+        order.order_total_price = data.order_total_price;
+        order.order_transfer = data.order_transfer
+        order.transfer = data.transfer;
+        order.bank_id = data.bank_id;
+        order.transfered_at = data.transfered_at;
+        order.is_active = data.is_active;
+        order.product = [];
+        if (data.product_id != null) {
+          const orderDetail = Order.getOrderDetail(data);
+          order.product.push(orderDetail);
         }
-        mapToppingId[key].push(product.topping_product_id);
-    }
-
-    if (!inserted && product.detail_product_id) {
-      ids.push(product.detail_product_id);
-    } 
-    return (product.detail_product_id && product.topping_product_id) && !inserted;
-  });
-
-
-  products.forEach(product => {
-    const key = product.detail_product_id;
-    let toppingIds = [];
-    // delete product.order_id;
-    delete product.topping_product_id;
-
-    product.topping = toppings.filter(topping => {
-      // delete topping.order_id;
-      delete topping.topping_product_id;
-
-      if (!mapToppingId[key]) {
-        return false;
+        ids.push(data.order_id);
+        result.push(order);
+        mapId[data.order_id] = index;
+        index++;
+      } else {
+        if (data.product_id != null) {
+          const orderDetail = Order.getOrderDetail(data);
+          result[mapId[data.order_id]].product.push(orderDetail);
+        }
       }
-      topping.topping = [];
-      const canAdd = mapToppingId[key].includes(topping.product_id) 
-        && product.shop_id == topping.shop_id 
-        && (product.detail_product_id == topping.topping_detail_product_id || !topping.topping_detail_product_id);
 
-      if (canAdd && !toppingIds.includes(topping.product_id)) {
-        toppingIds.push(topping.product_id);
-        return true;
-      }
-      return false;
     });
-  });
-  return products;
+    return result;
+  }
+  static getOrderDetail(data) {
+    let orderDetail = {};
+    orderDetail.order_detail_id = data.order_detail_id;
+    orderDetail.product_id = data.product_id;
+    orderDetail.product_name = data.product_name;
+    orderDetail.product_unit = data.product_unit;
+    orderDetail.product_desc = data.product_desc;
+    orderDetail.product_img_url = data.product_img_url;
+    orderDetail.product_rating = data.product_rating;
+    orderDetail.product_price = data.product_price;
+    orderDetail.product_quantity = data.product_quantity;
+    orderDetail.shop_name = data.shop_name;
+    orderDetail.type_name = data.type_name;
+    orderDetail.quantity = data.quantity;
+    orderDetail.price = data.price;
+
+    return orderDetail;
+  }
 }

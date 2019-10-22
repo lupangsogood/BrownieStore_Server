@@ -1,7 +1,7 @@
 module.exports = {
     filterData(data) {
      data.forEach((value) => {
-        if (value == undefined && value != null) {
+        if (value === undefined) {
             throw new Error("Some paramter is undefinded");
         }
      });

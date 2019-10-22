@@ -13,15 +13,49 @@ module.exports = class Shop {
     this.updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
   }
 
+
+  async save() {
+    const data =  await filter.filterData(
+      [
+        this.shopName,
+        this.shopTel,
+        this.createdAt,
+        this.updatedAt,
+        this.isActive
+      ]
+    );
+    return db.execute(
+      `INSERT INTO shops (shop_name, shop_tel, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?)`
+      , data);
+  }
+
+  static async fetchAll() {
+    return db.execute(`SELECT shop_id, shop_name, shop_tel FROM shops WHERE is_active = 1`);
+  }
+  
   static async findById(shopId) {
     const data =  await filter.filterData([shopId]);
     return db.execute(
-      `
-      SELECT
-      s.shop_id, s.shop_name, s.shop_tel
-      FROM shops s 
-      WHERE s.shop_id = ? 
-      `, data
-    );
+      `SELECT s.shop_id, s.shop_name, s.shop_tel FROM shops s WHERE s.shop_id = ? `
+      , data);
   }
+
+  async update() {
+    const data =  await filter.filterData(
+      [
+        this.shopName,
+        this.shopTel,
+        this.updatedAt,
+        this.isActive,
+        this.shopId
+      ]
+    );
+    return db.execute(
+      `UPDATE shops SET shop_name=?, shop_tel=?, updated_at=?, is_active=? WHERE shop_id=? `
+      , data);
+  }
+  
 }
+
+
+

@@ -85,28 +85,11 @@ exports.postSocialLogin = async (req, res, next) => {
 
   try {
     const result = await User.findByToken(socialToken);
+    let userId;
     if (result[0].length == 0) {
         const user = new User(null, email, null, socialToken, firstname, lastname, null, null, roleId, isSocialLogin, isActive);
         await user.save();
-        const userId = result[0].insertId;
-
-        const token = jwt.sign({
-          user_id: userId, 
-          user_email: email,
-          role_id: roleId 
-        }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
-        
-        obj.data.user = {
-          user_id: obj.insertedId,
-          user_email: email,
-          user_firstname: firstname,
-          user_lastname: lastname,
-          user_address: '',
-          user_tel: '',
-          is_social_login: true,
-          is_active: true,
-          access_token: token
-        }
+        userId = result[0].insertId;
     } else {
         const user = result[0][0];
         if (user.user_social_token == socialToken && isSocialLogin) {
@@ -120,8 +103,27 @@ exports.postSocialLogin = async (req, res, next) => {
           error.statusCode = 401;
           throw error;
         }
-        obj.data.user = filterLoginResponse(user);
+        userId = user.user_id;
     }
+
+    const token = jwt.sign({
+      user_id: userId, 
+      user_email: email,
+      role_id: roleId 
+    }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
+    
+    obj.data.user = {
+      user_id: userId,
+      user_email: email,
+      user_firstname: firstname,
+      user_lastname: lastname,
+      user_address: '',
+      user_tel: '',
+      is_social_login: true,
+      is_active: true,
+      access_token: token
+    }
+
   } catch (err) {
     return next(err);
   }
@@ -130,7 +132,7 @@ exports.postSocialLogin = async (req, res, next) => {
 
 exports.postUpdateUser = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const userId = req.params.userId;
+  const userId = req.params.user_id;
   const firstname = req.body.user_firstname;
   const lastname = req.body.user_lastname;
   const address = req.body.user_address;
