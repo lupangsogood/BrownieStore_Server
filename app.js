@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/images/product", express.static(path.join(__dirname, "images/product")));
 
 //controllers
-const errorController = require("./controllers/errorController");
+const errorController = require("./controllers/ErrorController");
 
 //routes
 const apiRoutes = require("./routes/api");
