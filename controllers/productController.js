@@ -5,6 +5,7 @@ const Resize = require('../util/Resize');
 const uuidv1 = require('uuid/v1');
 const fs = require("fs");
 
+
 exports.getIndex = (req, res, next) => {
   const products = Product.testCallback((err, results, fields) => {
     console.log("====callback====");

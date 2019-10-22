@@ -125,13 +125,14 @@ module.exports = class Order {
         this.emsStatusId,
         this.statusId,
         this.status,
+        this.transfer,
         this.updatedAt,
         this.isActive,
         this.orderId
       ]
     );
     return db.execute(
-      `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, updated_at=?, 
+      `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, order_transfer=?, updated_at=?, 
       is_active=? WHERE order_id =?`
       , data);
   }

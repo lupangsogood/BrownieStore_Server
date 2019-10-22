@@ -95,7 +95,7 @@ exports.postUpdateOrder = async (req, res, next) => {
     ems = (ems === undefined ? oldOrder.order_ems : ems);
     emsStatus = (emsStatus === undefined ? oldOrder.order_ems_sts : emsStatus);
     emsStatusId = (emsStatusId === undefined ? oldOrder.order_ems_sts_id : emsStatusId);
-
+    transfer = (transfer === undefined ? oldOrder.order_transfer : transfer);
     const order = new Order({
       orderId: orderId, 
       statusId: statusId,
@@ -103,7 +103,8 @@ exports.postUpdateOrder = async (req, res, next) => {
       isActive: isActive, 
       ems: ems,
       emsStatus:emsStatus,
-      emsStatusId: emsStatusId
+      emsStatusId: emsStatusId,
+      transfer: transfer,
     }); 
     const result = await order.updateOrder();
     next(obj);
