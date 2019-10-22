@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+  const env = require('dotenv');
+  env.config();
+}
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -5,6 +9,13 @@ const cors = require("cors");
 const app = express();
 const multer = require("multer");
 const fileStorage = require("./util/fileStorage");
+const compression = require("compression");
+const morgan = require("morgan");
+const fs = require('fs');
+
+
+console.log(process.env.NODE_ENV);
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
 //views engine
 // app.set('view engine', 'ejs');
@@ -14,6 +25,8 @@ const fileStorage = require("./util/fileStorage");
 app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 app.use(cors());
+app.use(compression());
+app.use(morgan('combined', { stream : accessLogStream}));
 
 //upload
 //need to declare global for using multer
@@ -80,4 +93,4 @@ app.use((obj, req, res, next) => {
 app.use("/500", errorController.get500Page);
 app.use(errorController.get404Page);
 
-app.listen(3000);
+app.listen(process.env.PORT || 3000);

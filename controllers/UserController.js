@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const config = require('../util/config');
 const Role = require('../models/Role');
 
 exports.postSignup = async (req, res, next) => {
@@ -58,7 +57,7 @@ exports.postLogin = async (req, res, next) => {
       user_id: user.user_id, 
       user_email: user.user_email,
       role_id: user.role_id 
-    }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
+    }, process.env.SECRET_KEY, {expiresIn: process.env.EXPIRE});
 
     obj.data.user = filterLoginResponse(user);
     obj.data.user.access_token = token;
@@ -110,7 +109,7 @@ exports.postSocialLogin = async (req, res, next) => {
       user_id: userId, 
       user_email: email,
       role_id: roleId 
-    }, config.jwt.secret_key, {expiresIn: config.jwt.expire});
+    }, process.env.SECRET_KEY, {expiresIn: process.env.EXPIRE});
     
     obj.data.user = {
       user_id: userId,
