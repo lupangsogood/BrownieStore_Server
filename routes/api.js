@@ -7,7 +7,8 @@ const Role = require('../models/Role');
 const fileStorage = require("../util/fileStorage");
 const multer = require("multer");
 
-
+const uploadProduct = multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter });
+const uploadSlip = multer({ storage: fileStorage.slipStorage,  fileFilter: fileStorage.fileFilter });
 
 const ProductController = require('../controllers/ProductController');
 //user and admin
@@ -15,12 +16,8 @@ router.get('/product', ProductController.getProducts);
 router.get('/product/:product_id', ProductController.getProduct);
 router.post('/product/rating/:product_id', ProductController.postUpdateRatingProduct);
 //admin
-router.post('/product'
-, multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter }).single("image")
-, ProductController.postAddProduct);
-router.post('/product/:product_id'
-, multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter }).single("image")
-, ProductController.postUpdateProduct);
+router.post('/product', uploadProduct.single("image"), ProductController.postAddProduct);
+router.post('/product/:product_id', uploadProduct.single("image"), ProductController.postUpdateProduct);
 
 
 // router.get('/', ProductController.getIndex);
@@ -64,10 +61,7 @@ router.get('/order', OrderController.getOrders);
 router.get('/order/:order_id', OrderController.getOrder);
 router.get('/cart', OrderController.getNewOrder);
 router.post('/cart/:order_id', OrderController.postUpdateOrderDetail); // add product to cart
-// router.post('/order/confirm/:order_id', OrderController.postUpdateStatusOrder); // cancel order or submit cart
-router.post('/order/payment/:order_id', 
-  multer({ storage: fileStorage.slipStorage,  fileFilter: fileStorage.fileFilter }).single("image"), 
-  OrderController.postPayment);
+router.post('/order/payment/:order_id', uploadSlip.single("image"), OrderController.postPayment);
 //admin
 router.post('/order/status/:order_id', OrderController.postUpdateOrder); // update ems, status, cancel
 
