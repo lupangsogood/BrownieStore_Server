@@ -1,19 +1,24 @@
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
-const multer = require("multer");
 const cors = require("cors");
-const fileStorage = require("./util/fileStorage");
 const app = express();
+const multer = require("multer");
+const fileStorage = require("./util/fileStorage");
 
 //views engine
 // app.set('view engine', 'ejs');
 // app.set('views', 'views');
 
 //middleware
-app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 app.use(cors());
+
+//upload
+//need to declare global for using multer
+app.post('/uploads', multer({ storage: fileStorage.uploadStorage}).single("file"));
+
 
 app.use((req, res, next) => {
   req.user_id = 1;

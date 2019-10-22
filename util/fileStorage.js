@@ -13,6 +13,20 @@ exports.fileFilter = (req, file, cb) => {
   }
 };
 
+exports.uploadStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const path = `uploads`;
+    fs.mkdirsSync(path);
+    cb(null, path);
+
+  },
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split('.')[1];
+    cb(null, Date.now() + '.' + ext);
+  }
+});
+
+
 exports.productStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const path = `images/product`;
