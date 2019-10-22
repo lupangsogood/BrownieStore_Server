@@ -1,7 +1,7 @@
 const Product = require("../models/Product");
 const Type = require("../models/Type");
 const Shop = require("../models/Shop");
-const Resize = require('../util/Resize');
+const Resize = require('../util/resize');
 const uuidv1 = require('uuid/v1');
 const fs = require("fs");
 

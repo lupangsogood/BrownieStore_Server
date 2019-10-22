@@ -1,7 +1,7 @@
 const Order = require("../models/Order");
 const OrderDetail = require("../models/OrderDetail");
 const Role = require("../models/Role");
-const Resize = require('../util/Resize');
+const Resize = require('../util/resize');
 
 exports.getOrders = async (req, res, next) => {
   const obj = { data: {} };
