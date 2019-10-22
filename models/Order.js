@@ -118,6 +118,18 @@ module.exports = class Order {
   //     transferd_at=? ,updated_at=? WHERE order_id = ?`
   //     , data);
   // }
+  async updateStatusOrder() {
+    const data =  await filter.filterData(
+      [
+        this.statusId,
+        this.status,
+        this.orderId
+      ]
+    );
+    return db.execute(
+      `UPDATE orders SET order_sts_id=?, order_sts=? WHERE order_id =?`
+      , data);
+  }
 
   async updateOrder() {
     const data =  await filter.filterData(
@@ -128,14 +140,13 @@ module.exports = class Order {
         this.statusId,
         this.status,
         this.updatedAt,
-        this.ems,
         this.isActive,
         this.orderId
       ]
     );
     return db.execute(
       `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, updated_at=?, 
-      order_ems=?, is_active=? WHERE order_id =?`
+      is_active=? WHERE order_id =?`
       , data);
   }
 

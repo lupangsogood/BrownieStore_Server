@@ -66,7 +66,8 @@ exports.postUpdateOrder = async (req, res, next) => {
   let ems = req.body.order_ems;
   let emsStatus = req.body.order_ems_sts;
   let emsStatusId = req.body.order_ems_sts_id;
-
+  let statusId;
+  let status;
 
   if (isActive == false) {
     statusId = Order.ORDER_SHOP_CANCEL_STATUS.id;
@@ -102,12 +103,39 @@ exports.postUpdateOrder = async (req, res, next) => {
   }
 }
 
-exports.postUpdateUserOrder = async (req, res, next) => {
+exports.postUpdateConfirmOrder = async (req, res, next) => {
   //cancel order or submit cart
+  const obj = { insertedId:0, data: {} };
+  const orderId = req.params.order_id;
+  let statusId = req.body.order_sts_id;
+  let status;
+  try {
+    console.log(statusId , Order.ORDER_PENDING_STATUS.id);
+
+    switch (parseInt(statusId)) {
+      case Order.ORDER_PENDING_STATUS.id : 
+        status = Order.ORDER_PENDING_STATUS.text; 
+        break;
+      default : {
+        statusId = Order.ORDER_CANCEL_STATUS.id;
+        status = Order.ORDER_CANCEL_STATUS.text;
+      }
+    }
+    const order = new Order({
+      orderId: orderId, 
+      statusId: statusId,
+      status: status
+    }); 
+    const result = await order.updateStatusOrder();
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 
 exports.postPayment = async (req, res, next) => {
+  //update slip and status
 }
 
 

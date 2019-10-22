@@ -57,7 +57,7 @@ router.get('/order', OrderController.getOrders);
 router.get('/order/:order_id', OrderController.getOrder);
 router.get('/cart', OrderController.getNewOrder);
 router.post('/cart/:order_id', OrderController.postUpdateOrderDetail); // add product to cart
-router.post('/order/confirm/:order_id', OrderController.postUpdateUserOrder); // cancel order or submit cart
+router.post('/order/confirm/:order_id', OrderController.postUpdateConfirmOrder); // cancel order or submit cart
 router.post('/order/payment/:order_id', OrderController.postPayment);
 //admin
 router.post('/order/:order_id', OrderController.postUpdateOrder); // update ems, status, cancel
