@@ -44,7 +44,7 @@ exports.postAddProduct = async (req, res, next) => {
   let imgUrl = '';
   
   if (req.file != undefined) {
-    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
+    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in fileStorage.js 
     imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
     file.save(imgUrl);
   }

@@ -17,6 +17,7 @@ app.use(cors());
 
 app.use((req, res, next) => {
   req.user_id = 1;
+  req.role_id = 1;
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Method", "OPTIONS, GET, POST, PUT, PATH, DELETE");
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -26,10 +27,6 @@ app.use((req, res, next) => {
 //static
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/images/product", express.static(path.join(__dirname, "images/product")));
-
-
-//upload
-app.use(multer({ storage: fileStorage.productStorage,  fileFilter: fileStorage.fileFilter }).single("image"));
 
 //controllers
 const errorController = require("./controllers/errorController");

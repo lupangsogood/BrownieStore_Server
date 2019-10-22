@@ -1,5 +1,7 @@
 const Order = require("../models/Order");
 const OrderDetail = require("../models/OrderDetail");
+const Role = require("../models/Role");
+const Resize = require('../util/Resize');
 
 exports.getOrders = async (req, res, next) => {
   const obj = { data: {} };
@@ -60,32 +62,40 @@ exports.postUpdateOrderDetail = async (req, res, next) => {
 
 exports.postUpdateOrder = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const userId = req.user_id;
   const orderId = req.params.order_id;
-  let isActive = req.body.is_active;
+  const userId = req.user_id;
+  const roleId = req.role_id;
+  const statusId = req.body.order_sts_id;
+  let status;
+  let transfer = req.body.order_transfer;
   let ems = req.body.order_ems;
   let emsStatus = req.body.order_ems_sts;
   let emsStatusId = req.body.order_ems_sts_id;
-  let statusId;
-  let status;
+  let isActive = true;
 
-  if (isActive == false) {
-    statusId = Order.ORDER_SHOP_CANCEL_STATUS.id;
-    status = Order.ORDER_SHOP_CANCEL_STATUS.text;
-  } else {
-    statusId = Order.ORDER_SHIPPING_STATUS.id;
-    status = Order.ORDER_SHIPPING_STATUS.text;
+  if (statusId == Order.ORDER_PENDING_STATUS.id && (roleId == Role.ROLE_USER)) {
+    status = Order.ORDER_PENDING_STATUS.text; 
+  } else if (Order.ORDER_WAITING_STATUS.id && roleId == Role.ROLE_USER) {
+    status = Order.ORDER_WAITING_STATUS.text; 
+  } else if (Order.ORDER_SHIPPING_STATUS.id && roleId == Role.ROLE_ADMIN) {
+    status = Order.ORDER_SHIPPING_STATUS.text; 
+  } else if (Order.ORDER_COMPLETE_STATUS.id && roleId == Role.ROLE_ADMIN) {
+    status = Order.ORDER_COMPLETE_STATUS.text; 
+  } else if (Order.ORDER_CANCEL_STATUS.id && roleId == Role.ROLE_USER) {
+    status = Order.ORDER_CANCEL_STATUS.text; 
+  } else if (Order.ORDER_SHOP_CANCEL_STATUS.id && roleId == Role.ROLE_ADMIN) {
+    isActive = false;
+    status = Order.ORDER_SHOP_CANCEL_STATUS.text;     
   }
 
   try {
     const orderResult = await Order.findById(orderId);
     const oldOrder = orderResult[0][0];
-    
     isActive = (isActive === undefined ? oldOrder.is_active : isActive);
     ems = (ems === undefined ? oldOrder.order_ems : ems);
     emsStatus = (emsStatus === undefined ? oldOrder.order_ems_sts : emsStatus);
     emsStatusId = (emsStatusId === undefined ? oldOrder.order_ems_sts_id : emsStatusId);
-    
+
     const order = new Order({
       orderId: orderId, 
       statusId: statusId,
@@ -94,39 +104,8 @@ exports.postUpdateOrder = async (req, res, next) => {
       ems: ems,
       emsStatus:emsStatus,
       emsStatusId: emsStatusId
-    });
- 
-    const result = await order.updateOrder();
-    next(obj);
-  } catch (err) {
-    return next(err);
-  }
-}
-
-exports.postUpdateConfirmOrder = async (req, res, next) => {
-  //cancel order or submit cart
-  const obj = { insertedId:0, data: {} };
-  const orderId = req.params.order_id;
-  let statusId = req.body.order_sts_id;
-  let status;
-  try {
-    console.log(statusId , Order.ORDER_PENDING_STATUS.id);
-
-    switch (parseInt(statusId)) {
-      case Order.ORDER_PENDING_STATUS.id : 
-        status = Order.ORDER_PENDING_STATUS.text; 
-        break;
-      default : {
-        statusId = Order.ORDER_CANCEL_STATUS.id;
-        status = Order.ORDER_CANCEL_STATUS.text;
-      }
-    }
-    const order = new Order({
-      orderId: orderId, 
-      statusId: statusId,
-      status: status
     }); 
-    const result = await order.updateStatusOrder();
+    const result = await order.updateOrder();
     next(obj);
   } catch (err) {
     return next(err);
@@ -136,6 +115,33 @@ exports.postUpdateConfirmOrder = async (req, res, next) => {
 
 exports.postPayment = async (req, res, next) => {
   //update slip and status
+  const obj = { insertedId:0, data: {} };
+  const userId = req.user_id;
+  const orderId = req.params.order_id;
+  const bankId = req.body.bank_id;
+  const statusId = Order.ORDER_WAITING_STATUS.id;
+  const status = Order.ORDER_WAITING_STATUS.text;
+  let imgUrl = '';
+
+  if (req.file != undefined) {
+    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
+    imgUrl =  req.file.destination + '/' + orderId + '_' + userId + '_' + Date.now() + '.' + req.file.filename.split(".")[1];
+    file.save(imgUrl);
+  }
+  
+  try {
+    const order = new Order({
+      orderId: orderId, 
+      statusId: statusId,
+      status: status,
+      imgUrl: imgUrl,
+      bankId: bankId
+    }); 
+    const result = await order.updatePayment();
+    next(obj);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 

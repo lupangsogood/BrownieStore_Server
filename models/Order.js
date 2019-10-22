@@ -99,35 +99,21 @@ module.exports = class Order {
       , data);
   }
 
-  // async updatePayment() {
-  //   const data =  await filter.filterData(
-  //     [
-  //       this.imgUrl,
-  //       this.statusId,
-  //       this.status,
-  //       this.totalPrice,
-  //       this.transfer,
-  //       this.bankId,
-  //       this.transferedAt,
-  //       this.updatedAt,
-  //       this.orderId
-  //     ]
-  //   );
-  //   return db.execute(
-  //     `UPDATE orders SET order_img_url=? order_sts_id=?, order_sts=?, order_total_price=?, order_transfer=?, bank_id=? 
-  //     transferd_at=? ,updated_at=? WHERE order_id = ?`
-  //     , data);
-  // }
-  async updateStatusOrder() {
+  async updatePayment() {
     const data =  await filter.filterData(
       [
+        this.imgUrl,
         this.statusId,
         this.status,
+        this.bankId,
+        this.transferedAt,
+        this.updatedAt,
         this.orderId
       ]
     );
     return db.execute(
-      `UPDATE orders SET order_sts_id=?, order_sts=? WHERE order_id =?`
+      `UPDATE orders SET order_img_url=?, order_sts_id=?, order_sts=?, bank_id=?,
+      transfered_at=? ,updated_at=? WHERE order_id = ?`
       , data);
   }
 
