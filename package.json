@@ -4,7 +4,7 @@
   "description": "ALL_GOOD_API",
   "main": "app.js",
   "scripts": {
-    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "start": "node app.js",
     "server": "node app.js",
     "dev": "nodemon app.js"
   },
