@@ -1,8 +1,8 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../util/config');
-const Role = require('../models/role');
+const Role = require('../models/Role');
 
 exports.postSignup = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };

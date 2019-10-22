@@ -1,4 +1,4 @@
-const Type = require("../models/type");
+const Type = require("../models/Type");
 
 exports.getTypes = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
