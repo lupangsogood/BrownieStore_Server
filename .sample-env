@@ -6,3 +6,5 @@ EXPIRE=1000h
 HOST=localhost
 PORT=3000
 NODE_ENV=development
+EMS_HOST=https://trackapi.thailandpost.co.th/post/api/v1
+EMS_TOKEN=EJO&MVVfQ7UWUHG_SxN;INWrSEC.PTHHW/ThNfElDRKaAMUmT$P8PXR4RNRcJ_QAJyE:NIY+IJKSGwH4ShNZRbNdLAU%TLAD%Za
