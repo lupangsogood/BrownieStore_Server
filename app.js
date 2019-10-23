@@ -10,6 +10,7 @@ const fileStorage = require("./util/fileStorage");
 const compression = require("compression");
 const morgan = require("morgan");
 const fs = require('fs');
+const schedule = require('./util/schedule');
 
 
 console.log(process.env.NODE_ENV);
@@ -25,6 +26,8 @@ app.use(bodyParser.json()); // parse application/json
 app.use(cors());
 app.use(compression());
 app.use(morgan('combined', { stream : accessLogStream}));
+schedule.startUpdateEms({time: '0 0 0-23 * * *'}); //check every hour
+
 
 //upload
 //need to declare global for using multer

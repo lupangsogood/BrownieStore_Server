@@ -1,4 +1,3 @@
-const Order = require("../models/Order");
 const axios = require('axios');
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
@@ -38,5 +37,4 @@ exports.getTracking = (req, res, next) => {
     .finally(() => {
       next(obj);
     })
-    
 }
