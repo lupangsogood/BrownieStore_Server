@@ -11,17 +11,16 @@ const ORDER_COMPLETE_STATUS = {id: 5, text: 'สำเร็จ'};
 const ORDER_CANCEL_STATUS = {id: 6, text: 'ยกเลิก'};
 const ORDER_SHOP_CANCEL_STATUS = {id: 7, text: 'ยกเลิก (เจ้าของร้าน)'};
 
-const EMS_PENDING_STATUS = {id: 1, text: 'กำลังดำเนินการ'};
-const EMS_WAITING_STATUS = {id: 2, text: 'กำลังตรวจสอบ'};
-const EMS_SHIPPING_STATUS = {id: 3, text: 'กำลังขนส่ง'};
-const EMS_COMPLETE_STATUS = {id: 4, text: 'สำเร็จ'};
 
 
 module.exports = class Order {
   constructor({
     orderId = null, userId = null, statusId = null, status = null, 
     totalPrice = null, transfer = null, imgUrl = null, bankId = null, 
-    isActive = true, ems = null, emsStatus = null, emsStatusId = null,
+    isActive = true,
+    emsBarcode = null, emsStatus = null, emsDesc = null, emsDate = null,
+    emsLocation = null, emsPostCode = null, emsDeliveryStatus = null, 
+    emsDeliveryDesc = null, emsDeliveryDate = null, emsReceiver = null, emsSignature = null,
     transferedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
     createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
     updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss")
@@ -35,9 +34,17 @@ module.exports = class Order {
     this.imgUrl = imgUrl;
     this.bankId = bankId;
     this.isActive = isActive;
-    this.ems = ems;
+    this.emsBarcode = emsBarcode;
     this.emsStatus = emsStatus;
-    this.emsStatusId = emsStatusId;
+    this.emsDesc = emsDesc;
+    this.emsDate = emsDate;
+    this.emsLocation = emsLocation;
+    this.emsPostCode = emsPostCode;
+    this.emsDeliveryStatus = emsDeliveryStatus;
+    this.emsDeliveryDesc = emsDeliveryDesc;
+    this.emsDeliveryDate = emsDeliveryDate;
+    this.emsReceiver = emsReceiver; 
+    this.emsSignature = emsSignature;
     this.transferedAt = transferedAt;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -120,9 +127,7 @@ module.exports = class Order {
   async updateOrder() {
     const data =  await filter.filterData(
       [
-        this.ems,
-        this.emsStatus,
-        this.emsStatusId,
+        this.emsBarcode,
         this.statusId,
         this.status,
         this.transfer,
@@ -132,10 +137,58 @@ module.exports = class Order {
       ]
     );
     return db.execute(
-      `UPDATE orders SET order_ems=?, order_ems_sts=?, order_ems_sts_id=?, order_sts_id=?, order_sts=?, order_transfer=?, updated_at=?, 
+      `UPDATE orders SET 
+      ems_barcode=?,
+      order_sts_id=?, order_sts=?, order_transfer=?, updated_at=?, 
       is_active=? WHERE order_id =?`
       , data);
   }
+
+  static async findCronJobOrder() {
+    return db.execute(`SELECT * FROM orders WHERE (ems_barcode IS NOT NULL AND ems_barcode <> '') AND order_sts_id = ?`, 
+    [ORDER_SHIPPING_STATUS.id]);
+  }
+
+  async updateCronJobOrder() {
+    const data =  await filter.filterData(
+      [
+        this.emsBarcode,
+        this.emsStatus,
+        this.emsDesc,
+        this.emsDate,
+        this.emsLocation,
+        this.emsPostCode,
+        this.emsDeliveryStatus,
+        this.emsDeliveryDesc,
+        this.emsDeliveryDate,
+        this.emsReceiver,
+        this.emsSignature,
+        this.statusId,
+        this.status,
+        this.updatedAt,
+        this.orderId
+      ]
+    );
+    return db.execute(
+      `UPDATE orders SET
+      ems_barcode=?, 
+      ems_sts=?, 
+      ems_desc=?, 
+      ems_date=?, 
+      ems_location=?, 
+      ems_postcode=?, 
+      ems_delivery_sts=?, 
+      ems_delivery_desc=?, 
+      ems_delivery_date=?, 
+      ems_receiver=?, 
+      ems_signature=?, 
+      order_sts_id=?, 
+      order_sts=?, 
+      updated_at=? 
+      WHERE order_id = ?`
+      , data);
+  }
+
 
   static async updateTotalPrice(orderId) {
     const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
@@ -190,18 +243,6 @@ module.exports = class Order {
     return ORDER_SHOP_CANCEL_STATUS;
   }
 
-  static get EMS_PENDING_STATUS() {
-    return EMS_PENDING_STATUS;
-  }
-  static get EMS_WAITING_STATUS() {
-    return EMS_WAITING_STATUS;
-  }
-  static get EMS_SHIPPING_STATUS() {
-    return EMS_SHIPPING_STATUS;
-  }
-  static get EMS_COMPLETE_STATUS() {
-    return EMS_COMPLETE_STATUS;
-  }
 
   
   static getOrderResponse(data) {
@@ -220,9 +261,16 @@ module.exports = class Order {
         order.order_id = data.order_id;
         order.order_sts_id = data.order_sts_id;
         order.order_sts =  data.order_sts;
-        order.order_ems = data.order_ems;
-        order.order_ems_sts = data.order_ems_sts;
-        order.order_ems_sts_id = data.order_ems_sts_id;
+        order.ems_barcode = data.ems_barcode;
+        order.ems_sts = data.ems_sts;
+        order.ems_desc = data.ems_desc;
+        order.ems_date = data.ems_date;
+        order.ems_location = data.ems_location;
+        order.ems_postcode = data.ems_postcode;
+        order.ems_delivery_sts	 = data.ems_delivery_sts	;
+        order.ems_delivery_desc = data.ems_delivery_desc;
+        order.ems_receiver = data.ems_receiver;
+        order.ems_signature	 = data.ems_signature	;
         order.order_total_price = data.order_total_price;
         order.order_transfer = data.order_transfer
         order.transfer = data.transfer;

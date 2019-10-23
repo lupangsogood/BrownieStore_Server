@@ -68,9 +68,7 @@ exports.postUpdateOrder = async (req, res, next) => {
   const statusId = req.body.order_sts_id;
   let status;
   let transfer = req.body.order_transfer;
-  let ems = req.body.order_ems;
-  let emsStatus = req.body.order_ems_sts;
-  let emsStatusId = req.body.order_ems_sts_id;
+  let emsBarcode = req.body.ems_barcode;
   let isActive = true;
 
   if (statusId == Order.ORDER_PENDING_STATUS.id && (roleId == Role.ROLE_USER)) {
@@ -92,18 +90,14 @@ exports.postUpdateOrder = async (req, res, next) => {
     const orderResult = await Order.findById(orderId);
     const oldOrder = orderResult[0][0];
     isActive = (isActive === undefined ? oldOrder.is_active : isActive);
-    ems = (ems === undefined ? oldOrder.order_ems : ems);
-    emsStatus = (emsStatus === undefined ? oldOrder.order_ems_sts : emsStatus);
-    emsStatusId = (emsStatusId === undefined ? oldOrder.order_ems_sts_id : emsStatusId);
+    emsBarcode = (emsBarcode === undefined ? oldOrder.ems_barcode : emsBarcode);
     transfer = (transfer === undefined ? oldOrder.order_transfer : transfer);
     const order = new Order({
       orderId: orderId, 
       statusId: statusId,
       status: status,
+      emsBarcode: emsBarcode,
       isActive: isActive, 
-      ems: ems,
-      emsStatus:emsStatus,
-      emsStatusId: emsStatusId,
       transfer: transfer,
     }); 
     const result = await order.updateOrder();

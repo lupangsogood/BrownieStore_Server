@@ -26,7 +26,7 @@ app.use(bodyParser.json()); // parse application/json
 app.use(cors());
 app.use(compression());
 app.use(morgan('combined', { stream : accessLogStream}));
-schedule.startUpdateEms({time: '0 0 0-23 * * *'}); //check every hour
+// schedule.startUpdateEms({time: '10,20,30,40,50 0-59 0-23 * * *'}); //check every hour
 
 
 //upload
