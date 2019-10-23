@@ -4,7 +4,7 @@ const Role = require("../models/Role");
 const Resize = require('../util/resize');
 
 exports.getOrders = async (req, res, next) => {
-  const obj = { data: {} };
+  const obj = { insertedId:0, data: {} };
   try {
     const result = await Order.fetchAll();
     obj.data.order = Order.getOrderResponse(result[0]);

@@ -65,4 +65,7 @@ router.post('/order/payment/:order_id', uploadSlip.single("image"), OrderControl
 //admin
 router.post('/order/status/:order_id', OrderController.postUpdateOrder); // update ems, status, cancel
 
+const TrackingController = require('../controllers/TrackingController');
+router.get('/tracking/:trackingCode', TrackingController.getTracking);
+
 module.exports = router; 
