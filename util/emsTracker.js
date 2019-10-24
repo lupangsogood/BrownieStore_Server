@@ -5,19 +5,19 @@ const instance = axios.create({
   baseURL: process.env.EMS_HOST,
   method: 'POST'
 });
-let data = {
-  status: 'all',
-  language: 'TH',
-  barcode: []
-};
-let config = {
-  headers: {
-    Authorization: `Token ${process.env.EMS_TOKEN}`
-  }
-}
 
-module.exports = (codes) => {
-  data.barcode = codes;
+const fetch = (codes) => {
+  //declare in fetch because data will be referenced when it has multiple call
+  let config = {
+    headers: {
+      Authorization: `Token ${process.env.EMS_TOKEN}`
+    }
+  }
+  let data = {
+    status: 'all',
+    language: 'TH',
+    barcode: codes
+  };
   const promise = new Promise((resolve, reject) => {
     return instance
       .post("/authenticate/token", {}, config)
@@ -31,8 +31,11 @@ module.exports = (codes) => {
       })
       .catch(err => {
         reject(err);
-        
       });
   });
   return promise;
+}
+
+module.exports = {
+  fetch
 };

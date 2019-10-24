@@ -6,7 +6,7 @@ exports.getTracking = async (req, res, next) => {
   const trackerCodes = [];
   trackerCodes.push(code);
   try {
-    const result = await tracker(trackerCodes);
+    const result = await tracker.fetch(trackerCodes);
     obj.data.ems = result;
     next(obj);
   } catch (err) {
