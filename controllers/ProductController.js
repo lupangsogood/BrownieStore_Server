@@ -96,7 +96,7 @@ exports.postUpdateProduct = async (req, res, next) => {
     file.save(imgUrl);
     fs.unlink(oldImgUrl, err => { // remove old file
       if (err) {
-        return next(err);
+        //return next(err);
       }
     }); 
   }
