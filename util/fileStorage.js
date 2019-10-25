@@ -43,7 +43,7 @@ exports.productStorage = multer.diskStorage({
 exports.slipStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userId = req.user_id;
-    const path = `images/slip//${userId}`;
+    const path = `images/slip/${userId}`;
     fs.mkdirsSync(path);
     cb(null, path);
   },

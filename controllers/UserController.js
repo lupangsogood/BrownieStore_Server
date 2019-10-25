@@ -97,6 +97,8 @@ exports.postSocialLogin = async (req, res, next) => {
             error.statusCode = 401;
             throw error;
           }
+          firstname = user.user_firstname;
+          lastname = user.user_lastname;
         } else {
           const error = new Error('Can not login with this token');
           error.statusCode = 401;

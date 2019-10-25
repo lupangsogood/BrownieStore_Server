@@ -11,7 +11,8 @@ const compression = require("compression");
 const morgan = require("morgan");
 const fs = require('fs');
 const schedule = require('./util/schedule');
-
+const isAuth = require('./util/isAuth');
+const Role = require('./models/Role');
 
 console.log(process.env.NODE_ENV);
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
@@ -46,9 +47,12 @@ app.use((req, res, next) => {
 //static
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/images/product", express.static(path.join(__dirname, "images/product")));
+app.use("/images/slip", (req, res, next) => {
+    req.permissions = [Role.ROLE_USER, Role.ROLE_ADMIN];
+    next();
+}, isAuth, express.static(path.join(__dirname, "images/slip")));
 
-//controllers
-const errorController = require("./controllers/ErrorController");
+
 
 //routes
 const apiRoutes = require("./routes/api");
@@ -91,7 +95,8 @@ app.use((obj, req, res, next) => {
   }
 });
 
-app.use("/500", errorController.get500Page);
-app.use(errorController.get404Page);
+const ErrorController = require("./controllers/ErrorController");
+app.use("/500", ErrorController.get500Page);
+app.use(ErrorController.get404Page);
 
 app.listen(process.env.PORT || 3000);
