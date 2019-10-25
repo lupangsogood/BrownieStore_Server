@@ -47,10 +47,7 @@ app.use((req, res, next) => {
 //static
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/images/product", express.static(path.join(__dirname, "images/product")));
-app.use("/images/slip", (req, res, next) => {
-    req.permissions = [Role.ROLE_USER, Role.ROLE_ADMIN];
-    next();
-}, isAuth, express.static(path.join(__dirname, "images/slip")));
+app.use("/images/slip", express.static(path.join(__dirname, "images/slip")));
 
 
 
