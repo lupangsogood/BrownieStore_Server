@@ -68,4 +68,12 @@ router.post('/order/status/:order_id', OrderController.postUpdateOrder); // upda
 const TrackingController = require('../controllers/TrackingController');
 router.get('/tracking/:trackingCode', TrackingController.getTracking);
 
+// const UploadController = require('../controllers/UploadController');
+// router.get('/test/upload', UploadController.uploadToS3);
+// router.get('/test/read', UploadController.readObject);
+// router.get('/test/delete', UploadController.deleteObject);
+
+
+
+
 module.exports = router; 

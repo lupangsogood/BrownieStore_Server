@@ -12,7 +12,7 @@ class Resize {
 
     await sharp(this.file.path)
       .resize(500, 500, { fit: sharp.fit.inside, withoutEnlargement: true })
-      .jpeg({ quality: 50 })
+      .jpeg({ quality: 80 })
       .toFile(filepath);
     fs.unlink(this.file.path, err => {
       if (err) throw err;

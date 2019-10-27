@@ -2,6 +2,8 @@ const Order = require("../models/Order");
 const OrderDetail = require("../models/OrderDetail");
 const Role = require("../models/Role");
 const Resize = require('../util/resize');
+const uuidv1 = require('uuid/v1');
+const s3 = require("../util/s3");
 
 exports.getOrders = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
@@ -119,9 +121,16 @@ exports.postPayment = async (req, res, next) => {
   let imgUrl = '';
 
   if (req.file != undefined) {
-    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
-    imgUrl =  req.file.destination + '/' + orderId + '_' + userId + '_' + Date.now() + '.' + req.file.filename.split(".")[1];
-    file.save(imgUrl);
+    if (process.env.S3_USING) {
+      const filePath =  req.file.path;
+      const fileName =   req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
+      const result = await s3.upload(filePath, fileName);
+      imgUrl = result.Location;
+    } else {
+      const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
+      imgUrl =  req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
+      file.save(imgUrl);
+    }
   }
   
   try {

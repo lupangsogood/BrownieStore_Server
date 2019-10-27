@@ -1,0 +1,56 @@
+{
+    "Id": "Policy1572110213952",
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1572110211039",
+            "Action": [
+                "s3:Get*",
+                "s3:Put*"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::allgood-brownie",
+            "Principal": {
+                "AWS": "arn:aws:iam::499455111789:user/Admin"
+            }
+        }
+    ]
+}
+
+=========================== Work ==========================================
+
+{
+    "Id": "Policy1572110213952",
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1572110211039",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::allgood-brownie/*",
+            "Principal": {
+                "AWS": "arn:aws:iam::499455111789:user/Admin"
+            }
+        }
+    ]
+}
+
+======================= Work =============================================
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:Get*"
+            ],
+            "Resource": "arn:aws:s3:::allgood-brownie/*"
+        }
+    ]
+}

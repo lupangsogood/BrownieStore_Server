@@ -4,7 +4,7 @@ const Shop = require("../models/Shop");
 const Resize = require('../util/resize');
 const uuidv1 = require('uuid/v1');
 const fs = require("fs");
-
+const s3 = require("../util/s3");
 
 exports.getIndex = (req, res, next) => {
   const products = Product.testCallback((err, results, fields) => {
@@ -45,9 +45,16 @@ exports.postAddProduct = async (req, res, next) => {
   let imgUrl = '';
   
   if (req.file != undefined) {
-    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in fileStorage.js 
-    imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
-    file.save(imgUrl);
+    if (process.env.S3_USING) {
+        const filePath =  req.file.path;
+        const fileName =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
+        const result = await s3.upload(filePath, fileName);
+        imgUrl = result.Location;
+    } else {
+      const file = new Resize(req.file); //need to naming in html as "image" from setting multer in fileStorage.js 
+      imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
+      file.save(imgUrl);
+    }
   }
 
   try {
@@ -91,14 +98,24 @@ exports.postUpdateProduct = async (req, res, next) => {
   let oldImgUrl = imgUrl;
   
   if (req.file != undefined) {
-    const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
-    imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
-    file.save(imgUrl);
-    fs.unlink(oldImgUrl, err => { // remove old file
-      if (err) {
-        //return next(err);
-      }
-    }); 
+    if (process.env.S3_USING) {
+      const filePath =  req.file.path;
+      const fileName =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
+      const result = await s3.upload(filePath, fileName);
+      const oldImgPath = oldImgUrl.substring(oldImgUrl.indexOf(req.file.destination), oldImgUrl.length);
+      const resultDel = s3.delete(oldImgPath);
+      imgUrl = result.Location;
+
+    } else {
+      const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
+      imgUrl =  req.file.destination + '/' + uuidv1() + '.' + req.file.filename.split(".")[1];
+      file.save(imgUrl);
+      fs.unlink(oldImgUrl, err => { // remove old file
+        if (err) {
+          //return next(err);
+        }
+      }); 
+    }
   }
 
   try {
