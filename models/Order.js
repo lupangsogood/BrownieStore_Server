@@ -21,6 +21,7 @@ module.exports = class Order {
     emsBarcode = null, emsStatus = null, emsDesc = null, emsDate = null,
     emsLocation = null, emsPostCode = null, emsDeliveryStatus = null, 
     emsDeliveryDesc = null, emsDeliveryDate = null, emsReceiver = null, emsSignature = null,
+    orderAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
     transferedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
     createdAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss"),
     updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss")
@@ -48,6 +49,7 @@ module.exports = class Order {
     this.transferedAt = transferedAt;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.orderAt = orderAt;
   }
 
   async save() {
@@ -125,11 +127,17 @@ module.exports = class Order {
   }
 
   async updateOrder() {
+    let orderAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
+    if (this.statusId != Order.ORDER_PENDING_STATUS.id) {
+      orderAt = this.orderAt;
+    }
+
     const data =  await filter.filterData(
       [
         this.emsBarcode,
         this.statusId,
         this.status,
+        orderAt,
         this.transfer,
         this.updatedAt,
         this.isActive,
@@ -139,7 +147,7 @@ module.exports = class Order {
     return db.execute(
       `UPDATE orders SET 
       ems_barcode=?,
-      order_sts_id=?, order_sts=?, order_transfer=?, updated_at=?, 
+      order_sts_id=?, order_sts=?, order_at=?, order_transfer=?, updated_at=?, 
       is_active=? WHERE order_id =?`
       , data);
   }

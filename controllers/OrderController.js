@@ -73,17 +73,17 @@ exports.postUpdateOrder = async (req, res, next) => {
   let emsBarcode = req.body.ems_barcode;
   let isActive = true;
 
-  if (statusId == Order.ORDER_PENDING_STATUS.id && (roleId == Role.ROLE_USER)) {
+  if (statusId == Order.ORDER_PENDING_STATUS.id) {
     status = Order.ORDER_PENDING_STATUS.text; 
-  } else if (Order.ORDER_WAITING_STATUS.id && roleId == Role.ROLE_USER) {
+  } else if (statusId == Order.ORDER_WAITING_STATUS.id) {
     status = Order.ORDER_WAITING_STATUS.text; 
-  } else if (Order.ORDER_SHIPPING_STATUS.id && roleId == Role.ROLE_ADMIN) {
+  } else if (statusId == Order.ORDER_SHIPPING_STATUS.id) {
     status = Order.ORDER_SHIPPING_STATUS.text; 
-  } else if (Order.ORDER_COMPLETE_STATUS.id && roleId == Role.ROLE_ADMIN) {
+  } else if (statusId == Order.ORDER_COMPLETE_STATUS.id) {
     status = Order.ORDER_COMPLETE_STATUS.text; 
-  } else if (Order.ORDER_CANCEL_STATUS.id && roleId == Role.ROLE_USER) {
+  } else if (statusId == Order.ORDER_CANCEL_STATUS.id) {
     status = Order.ORDER_CANCEL_STATUS.text; 
-  } else if (Order.ORDER_SHOP_CANCEL_STATUS.id && roleId == Role.ROLE_ADMIN) {
+  } else if (statusId == Order.ORDER_SHOP_CANCEL_STATUS.id) {
     isActive = false;
     status = Order.ORDER_SHOP_CANCEL_STATUS.text;     
   }
@@ -94,6 +94,7 @@ exports.postUpdateOrder = async (req, res, next) => {
     isActive = (isActive === undefined ? oldOrder.is_active : isActive);
     emsBarcode = (emsBarcode === undefined ? oldOrder.ems_barcode : emsBarcode);
     transfer = (transfer === undefined ? oldOrder.order_transfer : transfer);
+    const orderAt = (oldOrder.order_at === undefined ? null : oldOrder.order_at);
     const order = new Order({
       orderId: orderId, 
       statusId: statusId,
@@ -101,6 +102,7 @@ exports.postUpdateOrder = async (req, res, next) => {
       emsBarcode: emsBarcode,
       isActive: isActive, 
       transfer: transfer,
+      orderAt: orderAt
     }); 
     const result = await order.updateOrder();
     next(obj);
