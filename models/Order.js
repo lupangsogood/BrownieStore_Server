@@ -274,6 +274,7 @@ module.exports = class Order {
         order.order_transfer = data.order_transfer
         order.transfer = data.transfer;
         order.bank_id = data.bank_id;
+        order.order_at = data.order_at;
         order.transfered_at = data.transfered_at;
         order.is_active = data.is_active;
         order.ems_barcode = data.ems_barcode;
