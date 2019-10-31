@@ -37,7 +37,7 @@ exports.postAddProduct = async (req, res, next) => {
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
-  const price = req.body.product_price;
+  const price = parseFloat(req.body.product_price).toFixed(2);
   const quantity = req.body.product_quantity;
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;
@@ -88,7 +88,7 @@ exports.postUpdateProduct = async (req, res, next) => {
   const name = req.body.product_name;
   const unitName = req.body.product_unit_name;
   const desc = req.body.product_desc;
-  const price = req.body.product_price;
+  const price = parseFloat(req.body.product_price).toFixed(2);
   const quantity = req.body.product_quantity;
   const rating = req.body.product_rating;
   const typeId = req.body.type_id;

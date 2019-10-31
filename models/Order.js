@@ -72,12 +72,13 @@ module.exports = class Order {
   static async fetchAll() {
     const data =  await filter.filterData([Order.ORDER_CART_STATUS.id]);
     return db.execute(`
-    SELECT  * FROM orders o 
+    SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
     INNER JOIN order_detail od ON o.order_id = od.order_id
     INNER JOIN products p ON p.product_id = od.product_id
     INNER JOIN types t ON t.type_id = p.type_id
     INNER JOIN shops s ON s.shop_id = od.shop_id
     WHERE o.order_sts_id <> ?
+    GROUP BY o.order_id, p.product_id
     `, data);
   }
   
@@ -85,12 +86,14 @@ module.exports = class Order {
     const data =  await filter.filterData([orderId]);
     return db.execute(
       `
-      SELECT  * FROM orders o 
+      SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
       INNER JOIN order_detail od ON o.order_id = od.order_id
       INNER JOIN products p ON p.product_id = od.product_id
       INNER JOIN types t ON t.type_id = p.type_id
       INNER JOIN shops s ON s.shop_id = od.shop_id
-      WHERE o.order_id = ? `
+      WHERE o.order_id = ? 
+      GROUP BY o.order_id, p.product_id
+      `
       , data);
   }
 
@@ -98,12 +101,13 @@ module.exports = class Order {
     const data =  await filter.filterData([userId, Order.ORDER_CART_STATUS.id]);
     return db.execute(
       `
-      SELECT o.*, p.*, od.quantity, od.price FROM orders o 
+      SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
       LEFT JOIN order_detail od ON o.order_id = od.order_id
       LEFT JOIN products p ON p.product_id = od.product_id
       LEFT JOIN types t ON t.type_id = p.type_id
       LEFT JOIN shops s ON s.shop_id = od.shop_id
-      WHERE o.user_id = ? AND o.order_sts_id = ? LIMIT 1
+      WHERE o.user_id = ? AND o.order_sts_id = ?
+      GROUP BY o.order_id, p.product_id
       `
       , data);
   }
@@ -212,22 +216,21 @@ module.exports = class Order {
        WHERE o.order_id = ?`
       , data);
   }
+  
 
-  static async cancel(orderId) {
-    const updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
-    const isActive = false;
-    const data =  await filter.filterData(
-      [
-        updatedAt,
-        isActive,
-        orderId
-      ]
+  static async updateStock(orderId) {
+    const data =  await filter.filterData([orderId]);
+    return db.execute(`
+      UPDATE products p
+      LEFT JOIN (SELEcT product_id, SUM(quantity) AS quantity FROM order_detail WHERE order_id = ?
+      GROUP BY product_id) AS  od
+      ON od.product_id = p.product_id
+      SET 
+      p.product_quantity = p.product_quantity - COALESCE(od.quantity,0)
+      `,
+      data
     );
-    return db.execute(
-      `UPDATE orders SET updated_at=?, is_active=? WHERE order_id = ?`
-      , data);
   }
-
 
   static get ORDER_CART_STATUS() {
     return ORDER_CART_STATUS;
@@ -270,9 +273,8 @@ module.exports = class Order {
         order.order_sts_id = data.order_sts_id;
         order.order_sts =  data.order_sts;
         order.order_img_url = data.order_img_url;
-        order.order_total_price = data.order_total_price;
-        order.order_transfer = data.order_transfer
-        order.transfer = data.transfer;
+        order.order_total_price = parseFloat((data.order_total_price).toFixed(2));
+        order.order_transfer = parseFloat((data.order_transfer).toFixed(2));
         order.bank_id = data.bank_id;
         order.order_at = data.order_at;
         order.transfered_at = data.transfered_at;
@@ -315,12 +317,12 @@ module.exports = class Order {
     orderDetail.product_desc = data.product_desc;
     orderDetail.product_img_url = data.product_img_url;
     orderDetail.product_rating = data.product_rating;
-    orderDetail.product_price = data.product_price;
+    orderDetail.product_price = parseFloat((data.product_price).toFixed(2));
     orderDetail.product_quantity = data.product_quantity;
     orderDetail.shop_name = data.shop_name;
     orderDetail.type_name = data.type_name;
     orderDetail.quantity = data.quantity;
-    orderDetail.price = data.price;
+    orderDetail.price = parseFloat((data.price).toFixed(2));
 
     return orderDetail;
   }

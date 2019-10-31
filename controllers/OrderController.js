@@ -79,6 +79,7 @@ exports.postUpdateOrder = async (req, res, next) => {
     status = Order.ORDER_WAITING_STATUS.text; 
   } else if (statusId == Order.ORDER_SHIPPING_STATUS.id) {
     status = Order.ORDER_SHIPPING_STATUS.text; 
+    Order.updateStock(orderId);
   } else if (statusId == Order.ORDER_COMPLETE_STATUS.id) {
     status = Order.ORDER_COMPLETE_STATUS.text; 
   } else if (statusId == Order.ORDER_CANCEL_STATUS.id) {
@@ -91,10 +92,17 @@ exports.postUpdateOrder = async (req, res, next) => {
   try {
     const orderResult = await Order.findById(orderId);
     const oldOrder = orderResult[0][0];
-    isActive = (isActive === undefined ? oldOrder.is_active : isActive);
-    emsBarcode = (emsBarcode === undefined ? oldOrder.ems_barcode : emsBarcode);
-    transfer = (transfer === undefined ? oldOrder.order_transfer : transfer);
-    const orderAt = (oldOrder.order_at === undefined ? null : oldOrder.order_at);
+    if (oldOrder != undefined) {
+      isActive = (isActive === undefined ? oldOrder.is_active : isActive);
+      emsBarcode = (emsBarcode === undefined ? oldOrder.ems_barcode : emsBarcode);
+      transfer = (transfer === undefined ? oldOrder.order_transfer : parseFloat(transfer).toFixed(2));
+    } else {
+      isActive = true;
+      emsBarcode = null;
+      transfer = 0;
+    }
+
+    const orderAt = (oldOrder === undefined ? null : oldOrder.order_at);
     const order = new Order({
       orderId: orderId, 
       statusId: statusId,

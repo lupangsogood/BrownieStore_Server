@@ -90,7 +90,7 @@ module.exports = class Product {
     return db.execute(`
     SELECT 
     p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, 
-    p.product_price, p.product_quantity, p.product_rating,
+    ROUND(p.product_price, 2) AS product_price, p.product_quantity, p.product_rating,
     t.type_name,
     NULL AS shop_name,
     NULL AS order_detail_id,
@@ -106,7 +106,7 @@ module.exports = class Product {
     return db.execute(`
       SELECT 
       p.product_id, p.product_name, p.product_unit, p.product_desc, p.product_img_url, 
-      p.product_price, p.product_quantity, p.product_rating,
+      ROUND(p.product_price, 2) AS product_price, p.product_quantity, p.product_rating,
       t.type_name,
       NULL AS shop_name,
       NULL AS order_detail_id,
