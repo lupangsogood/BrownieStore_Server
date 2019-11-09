@@ -36,8 +36,6 @@ app.post('/uploads', multer({ storage: fileStorage.uploadStorage}).single("file"
 
 
 app.use((req, res, next) => {
-  req.user_id = 1;
-  req.role_id = 1;
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Method", "OPTIONS, GET, POST, PUT, PATH, DELETE");
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

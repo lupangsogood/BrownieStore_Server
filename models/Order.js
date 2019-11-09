@@ -218,15 +218,28 @@ module.exports = class Order {
   }
   
 
-  static async updateStock(orderId) {
-    const data =  await filter.filterData([orderId]);
+  static async updateStock(orderId, isCancel = false) {
+    const data =  await filter.filterData([
+      orderId, 
+      Order.ORDER_SHIPPING_STATUS.id, 
+      isCancel, 
+      isCancel
+    ]);
     return db.execute(`
-      UPDATE products p
-      LEFT JOIN (SELEcT product_id, SUM(quantity) AS quantity FROM order_detail WHERE order_id = ?
-      GROUP BY product_id) AS  od
-      ON od.product_id = p.product_id
-      SET 
-      p.product_quantity = p.product_quantity - COALESCE(od.quantity,0)
+    UPDATE products p
+    LEFT JOIN (SELECT od.product_id, SUM(od.quantity) AS quantity 
+    FROM order_detail od
+    INNER JOIN orders o ON o.order_id = od.order_id
+    WHERE od.order_id = ? AND o.is_active = 1 AND o.order_sts_id = ?
+    GROUP BY od.product_id) AS  od
+    ON od.product_id = p.product_id
+    SET 
+    p.product_quantity = 
+      CASE
+        WHEN false = ? THEN p.product_quantity - COALESCE(od.quantity,0)
+        WHEN true = ? THEN p.product_quantity + COALESCE(od.quantity,0)
+        ELSE p.product_quantity
+      END
       `,
       data
     );

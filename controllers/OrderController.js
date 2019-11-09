@@ -84,9 +84,11 @@ exports.postUpdateOrder = async (req, res, next) => {
     status = Order.ORDER_COMPLETE_STATUS.text; 
   } else if (statusId == Order.ORDER_CANCEL_STATUS.id) {
     status = Order.ORDER_CANCEL_STATUS.text; 
+    Order.updateStock(orderId, isCancel = true);
   } else if (statusId == Order.ORDER_SHOP_CANCEL_STATUS.id) {
     isActive = false;
     status = Order.ORDER_SHOP_CANCEL_STATUS.text;     
+    Order.updateStock(orderId, isCancel = true);
   }
 
   try {

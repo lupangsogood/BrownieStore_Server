@@ -77,17 +77,29 @@ const updateEms = async (result, orderId, barcode) => {
     status: status,
     emsStatus: result[barcode][lastIndex].status,
     emsDesc: result[barcode][lastIndex].status_description,
-    emsDate: result[barcode][lastIndex].status_date,
+    emsDate: convertDateTime(result[barcode][lastIndex].status_date),
     emsLocation: result[barcode][lastIndex].location,
     emsPostCode: result[barcode][lastIndex].postcode,
     emsDeliveryStatus: result[barcode][lastIndex].delivery_status,
     emsDeliveryDesc: result[barcode][lastIndex].delivery_description,
-    emsDeliveryDate: result[barcode][lastIndex].delivery_datetime,
+    emsDeliveryDate: convertDateTime(''),
     emsReceiver: result[barcode][lastIndex].receiver_name,
     emsSignature: result[barcode][lastIndex].signature
   });
   const updated = orderInstance.updateCronJobOrder();
 }
+
+let convertDateTime = (dt) => {
+  if (dt != '' && dt != null) {
+    const dateTimeArr = dt.split(' ');
+    const dateArr = dateTimeArr[0].split('/');
+    const time = dateTimeArr[1].substring(0, 8);
+    const dateTime = (dateArr[2]-543) + '-' + dateArr[1] + '-' + dateArr[0] + ' ' + time;
+    return dateTime;
+  }
+  return null;
+}
+
 
 
 module.exports = {
