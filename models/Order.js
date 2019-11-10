@@ -97,6 +97,35 @@ module.exports = class Order {
       , data);
   }
 
+  static async fetchAllByUser(userId) {
+    const data =  await filter.filterData([Order.ORDER_CART_STATUS.id, userId]);
+    return db.execute(`
+    SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+    INNER JOIN order_detail od ON o.order_id = od.order_id
+    INNER JOIN products p ON p.product_id = od.product_id
+    INNER JOIN types t ON t.type_id = p.type_id
+    INNER JOIN shops s ON s.shop_id = od.shop_id
+    WHERE o.order_sts_id <> ? AND o.user_id = ?
+    GROUP BY o.order_id, p.product_id
+    `, data);
+  }
+  
+  static async findByIdByUser(orderId, userId) {
+    const data =  await filter.filterData([orderId, userId]);
+    return db.execute(
+      `
+      SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+      INNER JOIN order_detail od ON o.order_id = od.order_id
+      INNER JOIN products p ON p.product_id = od.product_id
+      INNER JOIN types t ON t.type_id = p.type_id
+      INNER JOIN shops s ON s.shop_id = od.shop_id
+      WHERE o.order_id = ? AND o.user_id = ?
+      GROUP BY o.order_id, p.product_id
+      `
+      , data);
+  }
+
+
   static async findCart(userId) {
     const data =  await filter.filterData([userId, Order.ORDER_CART_STATUS.id]);
     return db.execute(

@@ -92,13 +92,17 @@ router.post('/shop/:shop_id',  (req, res, next) => {
 
 const OrderController = require('../controllers/OrderController');
 //user
-router.get('/order', OrderController.getOrders);
-router.get('/order/:order_id', OrderController.getOrder);
+// router.get('/order', OrderController.getOrders);
+// router.get('/order/:order_id', OrderController.getOrder);
 // router.get('/cart', OrderController.getNewOrder);
 // router.post('/cart/:order_id', OrderController.postUpdateOrderDetail); // add product to cart
 // router.post('/order/payment/:order_id', uploadSlip.single("image"), OrderController.postPayment);
 // //admin
-router.post('/order/status/:order_id', OrderController.postUpdateOrder); // update ems, status, cancel
+// router.post('/order/status/:order_id', OrderController.postUpdateOrder); // update ems, status, cancel
+
+router.get('/order', isAuth, OrderController.getOrders);
+router.get('/order/:order_id', isAuth, OrderController.getOrder);
+router.post('/order/status/:order_id', isAuth, OrderController.postUpdateOrder); // update ems, status, cancel
 
 router.get('/cart',  (req, res, next) => {
   req.permissions = [Role.ROLE_USER];

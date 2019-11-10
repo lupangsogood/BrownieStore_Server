@@ -7,8 +7,15 @@ const s3 = require("../util/s3");
 
 exports.getOrders = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
+  const userId = req.user_id;
+  const roleId = req.role_id;
   try {
-    const result = await Order.fetchAll();
+    let result;
+    if (roleId == Role.ROLE_ADMIN) {
+      result = await Order.fetchAll();
+    } else if (roleId == Role.ROLE_USER) {
+      result = await Order.fetchAllByUser(userId);
+    }
     obj.data.order = Order.getOrderResponse(result[0]);
     next(obj);
   } catch (err) {
@@ -17,9 +24,16 @@ exports.getOrders = async (req, res, next) => {
 }
 exports.getOrder = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
+  const userId = req.user_id;
+  const roleId = req.role_id;
   const orderId = req.params.order_id;
   try {
-    const result = await Order.findById(orderId);
+    let result;
+    if (roleId == Role.ROLE_ADMIN) {
+      result = await Order.findById(orderId);
+    } else if (roleId == Role.ROLE_USER) {
+      result = await Order.findByIdByUser(orderId, userId);
+    }
     obj.data.order = Order.getOrderResponse(result[0]);
     next(obj);
   } catch (err) {
@@ -29,6 +43,7 @@ exports.getOrder = async (req, res, next) => {
 exports.getNewOrder = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const userId = req.user_id;
+  const roleId = req.role_id;
   try {
     let result = await Order.findCart(userId);
     if (result[0].length == 0) {

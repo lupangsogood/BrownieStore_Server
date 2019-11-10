@@ -83,11 +83,11 @@ exports.postSocialLogin = async (req, res, next) => {
   }
 
   try {
-    const result = await User.findByToken(socialToken);
+    let result = await User.findByToken(socialToken);
     let userId;
     if (result[0].length == 0) {
         const user = new User(null, email, null, socialToken, firstname, lastname, null, null, roleId, isSocialLogin, isActive);
-        await user.save();
+        result = await user.save();
         userId = result[0].insertId;
     } else {
         const user = result[0][0];
