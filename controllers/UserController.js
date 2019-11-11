@@ -72,6 +72,8 @@ exports.postSocialLogin = async (req, res, next) => {
   const email = req.body.user_email;
   let firstname = req.body.user_firstname;
   let lastname = req.body.user_lastname;
+  let address = '';
+  let tel = '';
   const socialToken = req.body.user_social_token;
   const isSocialLogin = true;
   const isActive = true;
@@ -99,6 +101,8 @@ exports.postSocialLogin = async (req, res, next) => {
           }
           firstname = user.user_firstname;
           lastname = user.user_lastname;
+          address = user.user_address;
+          tel = user.user_tel;
         } else {
           const error = new Error('Can not login with this token');
           error.statusCode = 401;
@@ -118,8 +122,8 @@ exports.postSocialLogin = async (req, res, next) => {
       user_email: email,
       user_firstname: firstname,
       user_lastname: lastname,
-      user_address: '',
-      user_tel: '',
+      user_address: address,
+      user_tel: tel,
       is_social_login: true,
       is_active: true,
       access_token: token
@@ -139,8 +143,25 @@ exports.postUpdateUser = async (req, res, next) => {
   const address = req.body.user_address;
   const tel = req.body.user_tel;
   try {
-    const user = new User(userId, null, null, null, firstname, lastname, address, tel, null, null, null);
-    await user.update();
+    const updatedUser = new User(userId, null, null, null, firstname, lastname, address, tel, null, null, null);
+    await updatedUser.update();
+
+    const result = await User.findById(userId);
+    if (result[0].length == 0) {
+      const error =  new Error("User not found");
+      error.statusCode = 401;
+      throw error;
+    } 
+    const user = result[0][0];
+    const token = jwt.sign({
+      user_id: user.user_id, 
+      user_email: user.user_email,
+      role_id: user.role_id 
+    }, process.env.SECRET_KEY, {expiresIn: process.env.EXPIRE});
+
+    obj.data.user = filterLoginResponse(user);
+    obj.data.user.access_token = token;
+
     next(obj);
   } catch (err) {
     return next(err);

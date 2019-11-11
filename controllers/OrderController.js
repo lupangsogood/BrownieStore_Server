@@ -88,7 +88,9 @@ exports.postUpdateOrder = async (req, res, next) => {
   let emsBarcode = req.body.ems_barcode;
   let isActive = true;
 
-  if (statusId == Order.ORDER_PENDING_STATUS.id) {
+  if (statusId == Order.ORDER_CART_STATUS.id) {
+    status = Order.ORDER_CART_STATUS.text; 
+  } else if (statusId == Order.ORDER_PENDING_STATUS.id) {
     status = Order.ORDER_PENDING_STATUS.text; 
   } else if (statusId == Order.ORDER_WAITING_STATUS.id) {
     status = Order.ORDER_WAITING_STATUS.text; 

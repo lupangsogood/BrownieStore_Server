@@ -49,6 +49,15 @@ module.exports = class Users {
       data
     );
   }
+
+  static async findById(userId) {
+    const data =  await filter.filterData([userId]);
+    return db.execute(
+      "SELECT * FROM users WHERE user_id = ? LIMIT 1",
+      data
+    );
+  }
+
   static async findByEmail(email) {
     const data =  await filter.filterData([email]);
     return db.execute(
