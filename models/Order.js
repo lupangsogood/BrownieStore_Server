@@ -72,8 +72,9 @@ module.exports = class Order {
   static async fetchAll() {
     const data =  await filter.filterData([Order.ORDER_CART_STATUS.id]);
     return db.execute(`
-    SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+    SELECT o.*, u.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
     INNER JOIN order_detail od ON o.order_id = od.order_id
+    INNER JOIN users u ON u.user_id = o.user_id
     INNER JOIN products p ON p.product_id = od.product_id
     INNER JOIN types t ON t.type_id = p.type_id
     INNER JOIN shops s ON s.shop_id = od.shop_id
@@ -86,8 +87,9 @@ module.exports = class Order {
     const data =  await filter.filterData([orderId]);
     return db.execute(
       `
-      SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+      SELECT o.*, u.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
       INNER JOIN order_detail od ON o.order_id = od.order_id
+      INNER JOIN users u ON u.user_id = o.user_id
       INNER JOIN products p ON p.product_id = od.product_id
       INNER JOIN types t ON t.type_id = p.type_id
       INNER JOIN shops s ON s.shop_id = od.shop_id
@@ -100,8 +102,9 @@ module.exports = class Order {
   static async fetchAllByUser(userId) {
     const data =  await filter.filterData([Order.ORDER_CART_STATUS.id, userId]);
     return db.execute(`
-    SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+    SELECT o.*, u.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
     INNER JOIN order_detail od ON o.order_id = od.order_id
+    INNER JOIN users u ON u.user_id = o.user_id
     INNER JOIN products p ON p.product_id = od.product_id
     INNER JOIN types t ON t.type_id = p.type_id
     INNER JOIN shops s ON s.shop_id = od.shop_id
@@ -114,8 +117,9 @@ module.exports = class Order {
     const data =  await filter.filterData([orderId, userId]);
     return db.execute(
       `
-      SELECT o.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
+      SELECT o.*,  u.*, p.*, CAST(SUM(od.quantity) AS UNSIGNED) AS quantity, od.price FROM orders o 
       INNER JOIN order_detail od ON o.order_id = od.order_id
+      INNER JOIN users u ON u.user_id = o.user_id
       INNER JOIN products p ON p.product_id = od.product_id
       INNER JOIN types t ON t.type_id = p.type_id
       INNER JOIN shops s ON s.shop_id = od.shop_id
@@ -331,6 +335,13 @@ module.exports = class Order {
         order.ems_delivery_desc = data.ems_delivery_desc;
         order.ems_receiver = data.ems_receiver;
         order.ems_signature	 = data.ems_signature	;
+        order.user = {};
+        order.user.user_id = data.user_id;
+        order.user.user_email = data.user_email;
+        order.user.user_firstname = data.user_firstname;
+        order.user.user_lastname = data.user_lastname;
+        order.user.user_address = data.user_address;
+        order.user.user_tel = data.user_tel;
         order.product = [];
         if (data.product_id != null) {
           const orderDetail = Order.getOrderDetail(data);
