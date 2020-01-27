@@ -138,12 +138,26 @@ exports.postSocialLogin = async (req, res, next) => {
 exports.postUpdateUser = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
   const userId = req.params.user_id;
+  const email = req.body.user_email;
   const firstname = req.body.user_firstname;
   const lastname = req.body.user_lastname;
   const address = req.body.user_address;
   const tel = req.body.user_tel;
   try {
-    const updatedUser = new User(userId, null, null, null, firstname, lastname, address, tel, null, null, null);
+
+    if (email == undefined) {
+      const resultOldUser = await User.findById(userId);
+      if (result[0].length == 0) {
+        const error =  new Error("User not found");
+        error.statusCode = 401;
+        throw error;
+      }
+      const oldUser = resultOldUser[0][0];
+      email = oldUser.user_email;
+    }
+
+
+    const updatedUser = new User(userId, email, null, null, firstname, lastname, address, tel, null, null, null);
     await updatedUser.update();
 
     const result = await User.findById(userId);

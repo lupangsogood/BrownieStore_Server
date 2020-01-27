@@ -22,7 +22,7 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'),
 // app.set('views', 'views');
 
 //middleware
-app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true,  limit: '10mb' })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 app.use(cors());
 app.use(compression());

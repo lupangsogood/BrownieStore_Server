@@ -78,6 +78,7 @@ module.exports = class Users {
   async update() {
     const data =  await filter.filterData(
       [
+        this.email,
         this.firstname,
         this.lastname,
         this.address,
@@ -87,7 +88,7 @@ module.exports = class Users {
       ]
     );
     return db.execute(
-      "UPDATE users SET user_firstname=?, user_lastname=?, user_address=?, user_tel=?, updated_at=? " +
+      "UPDATE users SET user_email=?, user_firstname=?, user_lastname=?, user_address=?, user_tel=?, updated_at=? " +
       "WHERE user_id=?", data
     );
   }
