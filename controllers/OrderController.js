@@ -139,44 +139,87 @@ exports.postUpdateOrder = async (req, res, next) => {
 }
 
 
-exports.postPayment = async (req, res, next) => {
-  //update slip and status
-  const obj = { insertedId:0, data: {} };
-  const userId = req.user_id;
-  const orderId = req.params.order_id;
-  const bankId = req.body.bank_id;
-  const statusId = Order.ORDER_WAITING_STATUS.id;
-  const status = Order.ORDER_WAITING_STATUS.text;
-  let imgUrl = '';
+// exports.postPayment = async (req, res, next) => {
+//   //update slip and status
+//   const obj = { insertedId:0, data: {} };
+//   const userId = req.user_id;
+//   const orderId = req.params.order_id;
+//   const bankId = req.body.bank_id;
+//   const statusId = Order.ORDER_WAITING_STATUS.id;
+//   const status = Order.ORDER_WAITING_STATUS.text;
+//   let imgUrl = '';
 
-  if (req.file != undefined) {
-    if (process.env.S3_USING) {
-      const filePath =  req.file.path;
-      const fileName =   req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
-      const result = await s3.upload(filePath, fileName);
-      imgUrl = result.Location;
-    } else {
-      const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
-      imgUrl =  req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
-      file.save(imgUrl);
-    }
-  }
+//   if (req.file != undefined) {
+//     if (process.env.S3_USING) {
+//       const filePath =  req.file.path;
+//       const fileName =   req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
+//       const result = await s3.upload(filePath, fileName);
+//       imgUrl = result.Location;
+//     } else {
+//       const file = new Resize(req.file); //need to naming in html as "image" from setting multer in app.js 
+//       imgUrl =  req.file.destination + '/' + orderId + '_' + userId + '_' + uuidv1() + '.' + req.file.filename.split(".")[1];
+//       file.save(imgUrl);
+//     }
+//   }
   
-  try {
-    const order = new Order({
-      orderId: orderId, 
-      statusId: statusId,
-      status: status,
-      imgUrl: imgUrl,
-      bankId: bankId
-    }); 
-    const result = await order.updatePayment();
-    next(obj);
-  } catch (err) {
-    return next(err);
-  }
-}
+//   try {
+//     const order = new Order({
+//       orderId: orderId, 
+//       statusId: statusId,
+//       status: status,
+//       imgUrl: imgUrl,
+//       bankId: bankId
+//     }); 
+//     const result = await order.updatePayment();
+//     next(obj);
+//   } catch (err) {
+//     return next(err);
+//   }
+// }
 
+
+
+const formidable = require('formidable');
+const http = require('http');
+const util = require('util');
+
+exports.postPayment = async (req, res, next) => {
+  let form = new formidable.IncomingForm();
+  form.parse(req, async (err, fields, files) => {
+    //update slip and status
+    const obj = { insertedId:0, data: {} };
+    const userId = req.user_id;
+    const orderId =  req.params.order_id;
+    const bankId = fields.bank_id;
+    const statusId = Order.ORDER_WAITING_STATUS.id;
+    const status = Order.ORDER_WAITING_STATUS.text;
+    let imgUrl = '';
+
+    try {
+      if (files.image != undefined) {
+        if (process.env.S3_USING) {
+          const filePath =  files.image.path;
+          const fileName =   'images/slip/' + userId + '/' + orderId + '_' + userId + '_' + uuidv1() + '_' + files.image.name;
+          const result = await s3.upload(filePath, fileName);
+          imgUrl = result.Location;
+        }
+      }
+    
+      const order = new Order({
+        orderId: orderId, 
+        statusId: statusId,
+        status: status,
+        imgUrl: imgUrl,
+        bankId: bankId
+      }); 
+      const result = await order.updatePayment();
+      next(obj);
+    } catch (err) {
+      return next(err);
+    }
+
+  });
+}
 
 
 const addNewOrder = async (userId) => {

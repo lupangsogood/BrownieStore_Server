@@ -114,12 +114,17 @@ router.post('/cart/:order_id',  (req, res, next) => {
   next();
 }, isAuth, OrderController.postUpdateOrderDetail);
 
+
+// router.post('/order/payment/:order_id',  (req, res, next) => {
+//   req.permissions = [Role.ROLE_USER];
+//   next();
+// }, isAuth, uploadSlip.single("image"), OrderController.postPayment);
+
+
 router.post('/order/payment/:order_id',  (req, res, next) => {
   req.permissions = [Role.ROLE_USER];
   next();
-}, isAuth, uploadSlip.single("image"), OrderController.postPayment);
-
-
+}, isAuth, OrderController.postPayment);
 
 
 
