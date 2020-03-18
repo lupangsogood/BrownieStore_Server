@@ -112,7 +112,13 @@ router.get('/cart',  (req, res, next) => {
 router.post('/cart/:order_id',  (req, res, next) => {
   req.permissions = [Role.ROLE_USER];
   next();
+}, isAuth, OrderController.postSaveOrderDetail);
+
+router.post('/cart_update/:order_id',  (req, res, next) => {
+  req.permissions = [Role.ROLE_USER];
+  next();
 }, isAuth, OrderController.postUpdateOrderDetail);
+
 
 
 // router.post('/order/payment/:order_id',  (req, res, next) => {

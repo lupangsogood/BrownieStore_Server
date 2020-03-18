@@ -15,6 +15,20 @@ module.exports = class OrderDetail {
     this.updatedAt = moment().tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss");
   }
 
+
+  async getOrderDetail() {
+    const data =  await filter.filterData(
+      [
+        this.orderId,
+        this.productId
+      ]
+    );
+    return db.execute(
+      `SELECT * FROM order_detail WHERE order_id = ? AND product_id = ? LIMIT 1`
+      , data);
+  }
+
+
   async save() {
     const data =  await filter.filterData(
       [
@@ -32,6 +46,32 @@ module.exports = class OrderDetail {
       `INSERT INTO order_detail (order_id, product_id, quantity, shop_id, is_active, created_at, updated_at, price) 
       SELECT ?, ?, ?, ?, ?, ?, ?, product_price FROM products WHERE product_id = ? LIMIT 1 `
       , data);
+  }
+
+
+  async update() {
+    if (this.quantity > 0) {
+      const data =  await filter.filterData(
+        [
+          this.quantity,
+          this.updatedAt,
+          this.orderId,
+          this.productId
+        ]
+      );
+      return db.execute(
+        `UPDATE order_detail SET quantity = ?, updated_at = ? WHERE order_id = ? AND product_id = ? `
+        , data);
+    } else {
+      const data =  await filter.filterData(
+        [
+          this.orderId,
+          this.productId
+        ]
+      );
+      return db.execute(`DELETE FROM order_detail WHERE order_id = ? AND product_id = ? `, data);
+    }
+
   }
 
 }

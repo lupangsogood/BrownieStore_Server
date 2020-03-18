@@ -58,23 +58,50 @@ exports.getNewOrder = async (req, res, next) => {
 }
 
 
-exports.postUpdateOrderDetail = async (req, res, next) => {
+exports.postSaveOrderDetail = async (req, res, next) => {
   const obj = { insertedId:0, data: {} };
-  const orderId = req.params.order_id;
-  const productId = req.body.product_id;
-  const shopId = req.body.shop_id;
-  const quantity = req.body.quantity;
-  const isActive = true;
-
+  var orderId = req.params.order_id;
+  var productId = req.body.product_id;
+  var shopId = req.body.shop_id;
+  var quantity = req.body.quantity;
+  var isActive = true;
   try {
     const orderDetail = new OrderDetail(null, orderId, productId, quantity, shopId, isActive);
-    const result = await orderDetail.save();
+    
+    const orderDetailResult = await orderDetail.getOrderDetail();
+    const oldOrderDetail = orderDetailResult[0][0];
+    if (oldOrderDetail == undefined) {
+      const result = await orderDetail.save();
+      obj.insertedId = result[0].insertId;
+    } else {
+      orderDetail.quantity = parseInt(orderDetailResult[0][0].quantity) + parseInt(quantity);
+      await orderDetail.update();
+    }
     const updated = await Order.updateTotalPrice(orderId);
-    obj.insertedId = result[0].insertId;
     next(obj);
   } catch (err) {
     return next(err);
   }
+  
+}
+exports.postUpdateOrderDetail = async (req, res, next) => {
+  const obj = { insertedId:0, data: {} };
+  var orderId = req.params.order_id;
+  var data = req.body.data;
+  if (data != undefined || data != null) {
+    try {
+      await data.forEach(async (obj) => {
+        if (obj.product_id) {
+          const orderDetail = new OrderDetail(null, orderId, obj.product_id, obj.quantity);
+          const updateOrderDetail = await orderDetail.update();
+        }
+      });
+      const updateOrder = await Order.updateTotalPrice(orderId);
+    } catch (err) {
+      return next(err);
+    }
+    next(obj);
+  } 
 }
 
 exports.postUpdateOrder = async (req, res, next) => {
